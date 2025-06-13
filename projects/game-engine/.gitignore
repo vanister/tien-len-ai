@@ -12,6 +12,7 @@ packages/
 TestResults/
 *.trx
 *.coverage
+coverage-report/*
 
 # Visual Studio / VS Code
 *.user

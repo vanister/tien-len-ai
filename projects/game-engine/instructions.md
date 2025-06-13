@@ -4,6 +4,9 @@
 - Prefer .NET and C# for backend services.
 - Follow .NET community best practices and conventions.
 - Consider the specific requirements and existing infrastructure.
+- Use MSTest for unit testing.
+  - Try and aim for 90% coverage.
+- Keep nuget/dotnet tools installs locally.
 
 **Code Organization:**
 - Apply clean architecture principles.

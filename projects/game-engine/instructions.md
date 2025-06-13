@@ -13,6 +13,8 @@
 - Separate business logic from infrastructure concerns.
 - Implement proper dependency injection.
 - Follow established patterns like Repository, Unit of Work, etc.
+- Use the simplified `namespace` syntax where the namespace is one line.
+- Keep classes to one per file.
 
 ## Implementation Guidelines
 

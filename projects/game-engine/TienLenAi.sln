@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B9C65639-3F63-4D54-ACA7-13C0E7B2219D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TienLenAI.Core.Tests", "tests\TienLenAI.Core.Tests\TienLenAI.Core.Tests.csproj", "{F01DA7B2-00A2-42D5-87F7-8E3C0852944C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D5CD6DDB-7826-4C34-B360-4524D2E3EC3C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TienLenAI.Core", "src\TienLenAI.Core\TienLenAI.Core.csproj", "{1A0907F0-E432-4AEB-9A8E-4BEABA599804}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F01DA7B2-00A2-42D5-87F7-8E3C0852944C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F01DA7B2-00A2-42D5-87F7-8E3C0852944C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F01DA7B2-00A2-42D5-87F7-8E3C0852944C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F01DA7B2-00A2-42D5-87F7-8E3C0852944C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A0907F0-E432-4AEB-9A8E-4BEABA599804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0907F0-E432-4AEB-9A8E-4BEABA599804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0907F0-E432-4AEB-9A8E-4BEABA599804}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0907F0-E432-4AEB-9A8E-4BEABA599804}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F01DA7B2-00A2-42D5-87F7-8E3C0852944C} = {B9C65639-3F63-4D54-ACA7-13C0E7B2219D}
+		{1A0907F0-E432-4AEB-9A8E-4BEABA599804} = {D5CD6DDB-7826-4C34-B360-4524D2E3EC3C}
+	EndGlobalSection
+EndGlobal

@@ -14,8 +14,6 @@ TestResults/
 *.coverage
 
 # Visual Studio / VS Code
-.vs/
-.vscode/
 *.user
 *.suo
 

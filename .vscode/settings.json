@@ -1,0 +1,8 @@
+{
+    "github.copilot.chat.locales": {
+        "*": "en"
+    },
+    "github.copilot.chat.welcomeMessage": "Welcome to the Tien Len AI project! Refer to the instructions in the [docs/instructions](./docs/instructions) folder.",
+    "github.copilot.chat.preInstructions": "Read and follow the guidelines in the [docs/instructions](./docs/instructions) folder at all times.",
+    "github.copilot.chat.initialPrompt": "I've read the instructions in the [docs/instructions](./docs/instructions) folder and will follow its guidelines for code style, structure, and technology choices throughout our interaction."
+}

@@ -2,7 +2,7 @@
     "github.copilot.chat.locales": {
         "*": "en"
     },
-    "github.copilot.chat.welcomeMessage": "Welcome to the Game Engine project! Refer to the instructions in the [instructions.md](./instructions.md) file.",
+    "github.copilot.chat.welcomeMessage": "Welcome to the Shared Types project! Refer to the instructions in the [instructions.md](./instructions.md) file.",
     "github.copilot.chat.preInstructions": "Read and follow the guidelines in the [instructions.md](./instructions.md) file at all times.",
     "github.copilot.chat.initialPrompt": "I've read the instructions in the [instructions.md](./instructions.md) file and will follow its guidelines for code style, structure, and technology choices throughout our interaction."
 }

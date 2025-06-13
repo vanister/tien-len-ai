@@ -1,24 +1,33 @@
-# Instructions for Copilot
+# Instructions for GitHub Copilot
 
-## General
-- Guard clauses first
-- Return early
-- Avoid deeply nested `if` statements
-	- Do not put return statements on the same line as `if` statements
-- Limit comments to only necessary ones to understand what the code is doing
-- Avoid crafty code
-- Keep it simple and concise
-- keep it focused on a single purpose
-- Format code to 100 chars per line
-- Follow SOLID principles
-- Keeping testing in mind when writing code
+When helping with this project, you must follow these guidelines at all times:
 
-## Backend 
-- Prefer .net and c#
-- Follow the communities best practices
-- If doing machine learning or ai use Python if the packaging and support is better
+## Project Documents
+- Always refer the project documents in the [docs](./docs) folder for context and requirements.
 
-## Database
-- Prefer T-SQL and SQL Server
-- Suggest alternative if it makes sense
-- I am open to using NoSQL if it’s the right choice
+## Code Style and Structure
+1. Guard clauses first
+2. Use early returns to reduce complexity
+3. Avoid deeply nested `if` statements
+   - Never put return statements on the same line as `if` statements
+4. Only include comments when necessary for understanding code purpose
+5. Write simple, concise code that avoids being overly clever
+6. Ensure each component has a single responsibility
+7. Format code to maximum 100 characters per line
+8. Strictly follow SOLID principles
+9. Write code with testability in mind
+
+## Technology Choices
+### Backend Development
+- Use .NET and C# as the primary technology stack
+- Follow C# community best practices
+- For machine learning/AI components:
+  - Use Python when its ecosystem provides better support or packages
+  - Otherwise, stick with C#
+
+### Database Technology
+- Default to T-SQL and SQL Server
+- Suggest alternatives only when there's a clear advantage
+- Consider NoSQL solutions only when they provide significant benefits for the use case
+
+These instructions must be followed for every interaction related to this project. Acknowledge these guidelines before proceeding with any code changes or suggestions.

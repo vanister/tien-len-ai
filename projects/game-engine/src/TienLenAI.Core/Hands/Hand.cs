@@ -19,9 +19,13 @@ public abstract class Hand : IComparable<Hand>
 
     /// <summary>
     /// Compares this hand with another hand of the same type.
-    /// Returns positive if this hand is stronger, negative if weaker, 0 if equal.
-    /// Throws InvalidOperationException if hands are of different types (except for Bombs).
     /// </summary>
+    /// <returns>
+    /// Returns positive if this hand is stronger, negative if weaker, 0 if equal.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if hands are of different types (except for Bombs).
+    /// </exception>
     public abstract int CompareTo(Hand? other);
 }
 

@@ -64,10 +64,10 @@ public class PairHandTests
             new Card(CardRank.King, CardSuit.Hearts),
             new Card(CardRank.King, CardSuit.Diamonds)
         ]);
-        var higherPair = new PairHand(new[] {
+        var higherPair = new PairHand([
             new Card(CardRank.Ace, CardSuit.Clubs),
             new Card(CardRank.Ace, CardSuit.Spades)
-        });
+        ]);
 
         // Act & Assert
         Assert.IsTrue(higherPair.CompareTo(lowerPair) > 0);

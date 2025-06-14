@@ -46,3 +46,4 @@
 - Limit comments to essential explanations of business logic or complex algorithms.
 - Prefer explicit, readable code over terse implementations.
 - Use descriptive variable and function names.
+- Follow the rules in the `.editorconfig` file

@@ -31,6 +31,7 @@
 - Consider scalability and maintainability.
 - Suggest alternatives when they might be more appropriate.
 - Always prioritize code readability and team productivity.
+- Always ask before generating code.
 
 **Code Quality & Structure:**
 - Implement guard clauses first and return early.

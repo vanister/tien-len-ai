@@ -28,14 +28,3 @@ public abstract class Hand : IComparable<Hand>
     /// </exception>
     public abstract int CompareTo(Hand? other);
 }
-
-public enum HandType
-{
-    Single,
-    Pair,
-    Triple,
-    Straight,
-    DoubleStraight,
-    TripleStraight,
-    Bomb
-}

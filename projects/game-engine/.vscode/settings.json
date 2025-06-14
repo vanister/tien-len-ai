@@ -1,4 +1,5 @@
 {
+    "dotnet.unitTests.runSettingsPath": "${workspaceFolder}/test.runsettings",
     "github.copilot.chat.locales": {
         "*": "en"
     },

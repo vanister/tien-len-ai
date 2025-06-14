@@ -172,7 +172,25 @@ public class StraightHandTests
         Assert.IsTrue(lowerStraight.CompareTo(higherStraight) < 0);
     }
 
-    // Note: Bomb comparison test will be added when BombHand is implemented
+    [TestMethod]
+    public void CompareTo_WithBombHand_ReturnsNegative()
+    {
+        // Arrange
+        var straight = new StraightHand([
+            new Card(CardRank.King, CardSuit.Hearts),
+            new Card(CardRank.Queen, CardSuit.Diamonds),
+            new Card(CardRank.Jack, CardSuit.Clubs)
+        ]);
+        var bomb = new BombHand([
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Three, CardSuit.Spades)
+        ]);
+
+        // Act & Assert
+        Assert.IsTrue(straight.CompareTo(bomb) < 0);
+    }
 
     [TestMethod]
     public void CompareTo_WithNull_ReturnsPositive()

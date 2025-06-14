@@ -99,20 +99,25 @@ public class TripleHandTests
         Assert.IsTrue(lowerTriple.CompareTo(higherTriple) < 0);
     }
 
-    // todo - add tests for Bomb and other hand types when bomb is implemented
-    // [TestMethod]
-    // public void CompareTo_WithBombHand_ReturnsNegative()
-    // {
-    //     // Arrange
-    //     var triple = new TripleHand([
-    //         new Card(CardRank.Ace, CardSuit.Hearts),
-    //         new Card(CardRank.Ace, CardSuit.Diamonds),
-    //         new Card(CardRank.Ace, CardSuit.Clubs)
-    //     ]);
+    [TestMethod]
+    public void CompareTo_WithBombHand_ReturnsNegative()
+    {
+        // Arrange
+        var triple = new TripleHand([
+            new Card(CardRank.Two, CardSuit.Hearts),
+            new Card(CardRank.Two, CardSuit.Diamonds),
+            new Card(CardRank.Two, CardSuit.Clubs)
+        ]);
+        var bomb = new BombHand([
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Three, CardSuit.Spades)
+        ]);
 
-    //     // Act & Assert
-    //     Assert.IsTrue(triple.CompareTo(mockBomb.Object) < 0);
-    // }
+        // Act & Assert
+        Assert.IsTrue(triple.CompareTo(bomb) < 0);
+    }
 
     [TestMethod]
     public void CompareTo_WithNull_ReturnsPositive()

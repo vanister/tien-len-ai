@@ -49,10 +49,15 @@ public class SingleHandTests
     {
         // Arrange
         var singleHand = new SingleHand(new Card(CardRank.Three, CardSuit.Spades));
-        var mockBombHand = new MockBombHand();
+        var bombHand = new BombHand([
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Three, CardSuit.Spades)
+        ]);
 
         // Act
-        var result = singleHand.CompareTo(mockBombHand);
+        var result = singleHand.CompareTo(bombHand);
 
         // Assert
         Assert.IsTrue(result < 0);
@@ -120,26 +125,12 @@ public class SingleHandTests
     {
         // Arrange
         var singleHand = new SingleHand(new Card(CardRank.Three, CardSuit.Spades));
-        var mockDifferentHand = new MockDifferentHand();
+        var pairHand = new PairHand([
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds)
+        ]);
 
         // Act - should throw
-        singleHand.CompareTo(mockDifferentHand);
-    }
-
-    // Mock classes for testing
-    private class MockBombHand : Hand
-    {
-        public override HandType Type => HandType.Bomb;
-        public MockBombHand() : base(Array.Empty<Card>()) { }
-        public override bool IsValid() => true;
-        public override int CompareTo(Hand? other) => 1;
-    }
-
-    private class MockDifferentHand : Hand
-    {
-        public override HandType Type => HandType.Pair;
-        public MockDifferentHand() : base(Array.Empty<Card>()) { }
-        public override bool IsValid() => true;
-        public override int CompareTo(Hand? other) => 0;
+        singleHand.CompareTo(pairHand);
     }
 }

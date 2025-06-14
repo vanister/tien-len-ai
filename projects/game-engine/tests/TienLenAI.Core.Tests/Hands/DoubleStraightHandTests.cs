@@ -271,4 +271,27 @@ public class DoubleStraightHandTests
         // Act - should throw
         shorter.CompareTo(longer);
     }
+
+    [TestMethod]
+    public void CompareTo_WithBombHand_ReturnsNegative()
+    {
+        // Arrange
+        var doubleStraight = new DoubleStraightHand([
+            new Card(CardRank.King, CardSuit.Hearts),
+            new Card(CardRank.King, CardSuit.Diamonds),
+            new Card(CardRank.Queen, CardSuit.Clubs),
+            new Card(CardRank.Queen, CardSuit.Spades),
+            new Card(CardRank.Jack, CardSuit.Hearts),
+            new Card(CardRank.Jack, CardSuit.Diamonds)
+        ]);
+        var bomb = new BombHand([
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Three, CardSuit.Spades)
+        ]);
+
+        // Act & Assert
+        Assert.IsTrue(doubleStraight.CompareTo(bomb) < 0);
+    }
 }

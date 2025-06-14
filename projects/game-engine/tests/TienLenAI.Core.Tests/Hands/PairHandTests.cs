@@ -92,6 +92,25 @@ public class PairHandTests
         Assert.IsTrue(lowerPair.CompareTo(higherPair) < 0);
     }
 
+    [TestMethod]
+    public void CompareTo_WithBombHand_ReturnsNegative()
+    {
+        // Arrange
+        var pair = new PairHand([
+            new Card(CardRank.Two, CardSuit.Hearts),
+            new Card(CardRank.Two, CardSuit.Diamonds)
+        ]);
+        var bomb = new BombHand([
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Three, CardSuit.Spades)
+        ]);
+
+        // Act & Assert
+        Assert.IsTrue(pair.CompareTo(bomb) < 0);
+    }
+
     // Note: Full Bomb comparison test will be added when BombHand is implemented
     [TestMethod]
     public void CompareTo_WithNull_ReturnsPositive()

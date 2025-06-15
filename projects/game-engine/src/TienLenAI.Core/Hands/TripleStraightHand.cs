@@ -23,33 +23,37 @@ public class TripleStraightHand : Hand
     /// <inheritdoc/>
     public override bool IsValid()
     {
+        // Must have at least 6 cards (2 consecutive triples) and be divisible by 3
         if (Cards.Count < 6 || Cards.Count % 3 != 0)
-            return false;
-
-        // Group cards by rank to ensure we have triples
-        var rankGroups = Cards.GroupBy(c => c.Rank).OrderBy(g => g.Key).ToList();
-
-        // Check if we have the right number of consecutive triples
-        if (rankGroups.Count != Cards.Count / 3)
-            return false;
-
-        // Ensure each group has exactly 3 cards and all cards have different suits
-        foreach (var group in rankGroups)
         {
-            if (group.Count() != 3)
-                return false;
+            return false;
+        }
 
-            // Check that all suits in this triple are different
-            var suits = group.Select(c => c.Suit).ToList();
-            if (suits.Distinct().Count() != 3)
-                return false;
+        // Group cards by rank and verify each rank appears exactly 3 times
+        var rankGroups = Cards.GroupBy(card => card.Rank).ToList();
+
+        // Each rank must appear exactly 3 times
+        if (rankGroups.Any(group => group.Count() != 3))
+        {
+            return false;
+        }
+
+        // Get the sequence of ranks (should be one entry per rank)
+        var ranks = rankGroups.Select(g => g.Key).OrderBy(r => r).ToList();
+
+        // 2's cannot be used in straights
+        if (ranks.Contains(CardRank.Two))
+        {
+            return false;
         }
 
         // Check if ranks are consecutive
-        for (int i = 1; i < rankGroups.Count; i++)
+        for (int i = 0; i < ranks.Count - 1; i++)
         {
-            if (rankGroups[i].Key != rankGroups[i - 1].Key + 1)
+            if ((int)ranks[i + 1] - (int)ranks[i] != 1)
+            {
                 return false;
+            }
         }
 
         return true;
@@ -58,16 +62,26 @@ public class TripleStraightHand : Hand
     /// <inheritdoc/>
     public override int CompareTo(Hand? other)
     {
-        if (other == null) return 1;
+        if (other == null)
+        {
+            return 1;
+        }
 
         // Handle comparison with BombHand
-        if (other is BombHand) return -1;
+        if (other is BombHand)
+        {
+            return -1;
+        }
 
         if (other is not TripleStraightHand otherTripleStraight)
+        {
             throw new InvalidOperationException($"Cannot compare a Triple Straight hand with a {other.GetType().Name}");
+        }
 
         if (Cards.Count != otherTripleStraight.Cards.Count)
+        {
             throw new InvalidOperationException("Cannot compare Triple Straight hands of different lengths");
+        }
 
         // Compare based on the highest triple
         var thisHighestRank = Cards.Max(c => c.Rank);

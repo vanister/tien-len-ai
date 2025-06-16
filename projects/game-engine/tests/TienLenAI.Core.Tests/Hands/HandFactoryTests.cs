@@ -576,9 +576,9 @@ public class HandFactoryTests
     }
 
     [TestMethod]
-    public void CreateHandsForType_DoubleStraight_ReturnsEmpty()
+    public void CreateHandsForType_DoubleStraight_ReturnsValidHands()
     {
-        // Arrange - Valid double straight cards
+        // Arrange - Valid double straight cards (3-3-4-4-5-5)
         var cards = new[]
         {
             new Card(CardRank.Three, CardSuit.Hearts),
@@ -593,13 +593,59 @@ public class HandFactoryTests
         var result = HandFactory.CreateHandsForType(cards, HandType.DoubleStraight);
 
         // Assert
-        Assert.AreEqual(0, result.Count); // TODO implementation - should be empty for now
+        Assert.AreEqual(1, result.Count); // Should find one valid double straight
+        Assert.AreEqual(HandType.DoubleStraight, result[0].Type);
+        Assert.AreEqual(6, result[0].Cards.Count);
+        Assert.IsTrue(result[0].IsValid());
     }
 
     [TestMethod]
-    public void CreateHandsForType_TripleStraight_ReturnsEmpty()
+    public void CreateHandsForType_DoubleStraight_WithMultipleCombinations_ReturnsAllValidHands()
     {
-        // Arrange - Valid triple straight cards
+        // Arrange - Multiple cards per rank should create different combinations
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs), // Extra 3
+            new Card(CardRank.Four, CardSuit.Clubs),
+            new Card(CardRank.Four, CardSuit.Spades),
+            new Card(CardRank.Five, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsForType(cards, HandType.DoubleStraight);
+
+        // Assert
+        Assert.IsTrue(result.Count >= 3); // Should have multiple combinations (C(3,2) * C(2,2) * C(2,2) = 3)
+        Assert.IsTrue(result.All(h => h.Type == HandType.DoubleStraight));
+        Assert.IsTrue(result.All(h => h.Cards.Count == 6));
+        Assert.IsTrue(result.All(h => h.IsValid()));
+    }
+
+    [TestMethod]
+    public void CreateHandsForType_DoubleStraight_WithInsufficientCards_ReturnsEmpty()
+    {
+        // Arrange - Not enough cards for double straight
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Four, CardSuit.Diamonds), // Only one of each rank
+            new Card(CardRank.Five, CardSuit.Clubs)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsForType(cards, HandType.DoubleStraight);
+
+        // Assert
+        Assert.AreEqual(0, result.Count);
+    }
+
+    [TestMethod]
+    public void CreateHandsForType_TripleStraight_ReturnsValidHands()
+    {
+        // Arrange - Valid triple straight cards (3-3-3-4-4-4)
         var cards = new[]
         {
             new Card(CardRank.Three, CardSuit.Hearts),
@@ -614,7 +660,86 @@ public class HandFactoryTests
         var result = HandFactory.CreateHandsForType(cards, HandType.TripleStraight);
 
         // Assert
-        Assert.AreEqual(0, result.Count); // TODO implementation - should be empty for now
+        Assert.AreEqual(1, result.Count); // Should find one valid triple straight
+        Assert.AreEqual(HandType.TripleStraight, result[0].Type);
+        Assert.AreEqual(6, result[0].Cards.Count);
+        Assert.IsTrue(result[0].IsValid());
+    }
+
+    [TestMethod]
+    public void CreateHandsForType_TripleStraight_WithMultipleCombinations_ReturnsAllValidHands()
+    {
+        // Arrange - Multiple cards per rank should create different combinations
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Three, CardSuit.Spades), // Extra 3 (4 total)
+            new Card(CardRank.Four, CardSuit.Hearts),
+            new Card(CardRank.Four, CardSuit.Diamonds),
+            new Card(CardRank.Four, CardSuit.Clubs)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsForType(cards, HandType.TripleStraight);
+
+        // Assert
+        Assert.IsTrue(result.Count >= 4); // Should have multiple combinations (C(4,3) * C(3,3) = 4)
+        Assert.IsTrue(result.All(h => h.Type == HandType.TripleStraight));
+        Assert.IsTrue(result.All(h => h.Cards.Count == 6));
+        Assert.IsTrue(result.All(h => h.IsValid()));
+    }
+
+    [TestMethod]
+    public void CreateHandsForType_TripleStraight_WithInsufficientCards_ReturnsEmpty()
+    {
+        // Arrange - Not enough cards for triple straight
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds), // Only two 3s
+            new Card(CardRank.Four, CardSuit.Clubs),
+            new Card(CardRank.Four, CardSuit.Spades),
+            new Card(CardRank.Four, CardSuit.Hearts) // Three 4s
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsForType(cards, HandType.TripleStraight);
+
+        // Assert
+        Assert.AreEqual(0, result.Count);
+    }
+
+    [TestMethod]
+    public void CreateHandsForType_TripleStraight_WithLongerSequence_ReturnsValidHands()
+    {
+        // Arrange - Valid triple straight cards (3-3-3-4-4-4-5-5-5)
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Four, CardSuit.Hearts),
+            new Card(CardRank.Four, CardSuit.Diamonds),
+            new Card(CardRank.Four, CardSuit.Clubs),
+            new Card(CardRank.Five, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds),
+            new Card(CardRank.Five, CardSuit.Clubs)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsForType(cards, HandType.TripleStraight);
+
+        // Assert
+        Assert.IsTrue(result.Count >= 2); // Should find both 6-card (3-4) and 9-card (3-4-5) triple straights
+        Assert.IsTrue(result.All(h => h.Type == HandType.TripleStraight));
+        Assert.IsTrue(result.All(h => h.IsValid()));
+
+        // Should have different lengths
+        var lengths = result.Select(h => h.Cards.Count).Distinct().OrderBy(l => l).ToList();
+        Assert.IsTrue(lengths.Contains(6)); // 3-4 triple straight
+        Assert.IsTrue(lengths.Contains(9)); // 3-4-5 triple straight
     }
 
     [TestMethod]

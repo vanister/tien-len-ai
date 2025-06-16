@@ -184,12 +184,12 @@ public static class HandFactory
 
     #region Private Helper Methods for CreateHandsForType
 
-    private static IReadOnlyList<Hand> CreateAllSingles(List<Card> cards)
+    private static List<Hand> CreateAllSingles(List<Card> cards)
     {
-        return cards.Select(card => new SingleHand(card)).ToList();
+        return cards.Select(card => new SingleHand(card)).Cast<Hand>().ToList();
     }
 
-    private static IReadOnlyList<Hand> CreateAllPairs(List<Card> cards)
+    private static List<Hand> CreateAllPairs(List<Card> cards)
     {
         var pairs = new List<Hand>();
 
@@ -217,7 +217,7 @@ public static class HandFactory
         return pairs;
     }
 
-    private static IReadOnlyList<Hand> CreateAllTriples(List<Card> cards)
+    private static List<Hand> CreateAllTriples(List<Card> cards)
     {
         var triples = new List<Hand>();
 
@@ -248,7 +248,7 @@ public static class HandFactory
         return triples;
     }
 
-    private static IReadOnlyList<Hand> CreateAllStraights(List<Card> cards)
+    private static List<Hand> CreateAllStraights(List<Card> cards)
     {
         var straights = new List<Hand>();
 
@@ -301,7 +301,7 @@ public static class HandFactory
         return straights;
     }
 
-    private static IReadOnlyList<Hand> CreateAllBombs(List<Card> cards)
+    private static List<Hand> CreateAllBombs(List<Card> cards)
     {
         var bombs = new List<Hand>();
 
@@ -328,18 +328,158 @@ public static class HandFactory
         return bombs;
     }
 
-    private static IReadOnlyList<Hand> CreateAllDoubleStraights(List<Card> cards)
+    private static List<Hand> CreateAllDoubleStraights(List<Card> cards)
     {
-        // TODO: Implement double straight generation
-        // This is complex - need to find consecutive pairs
-        return [];
+        var doubleStraights = new List<Hand>();
+
+        // Group cards by rank (excluding 2s as they can't be in straights)
+        var rankGroups = cards
+            .Where(c => c.Rank != CardRank.Two)
+            .GroupBy(c => c.Rank)
+            .Where(g => g.Count() >= 2) // Need at least 2 cards per rank for pairs
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        if (rankGroups.Count < 3) // Need at least 3 consecutive pairs (minimum double straight)
+        {
+            return doubleStraights;
+        }
+
+        var availableRanks = rankGroups.Keys.OrderBy(r => r).ToList();
+
+        // Try all possible consecutive sequences (length 3 to max possible)
+        var maxLength = Math.Min(10, availableRanks.Count); // Max 10 pairs (3-A)
+
+        for (int length = 3; length <= maxLength; length++)
+        {
+            // Try all possible starting positions
+            for (int start = 0; start <= availableRanks.Count - length; start++)
+            {
+                // Check if we have consecutive ranks
+                bool isConsecutive = true;
+                var sequence = new List<CardRank>();
+
+                for (int i = 0; i < length; i++)
+                {
+                    var currentRank = availableRanks[start + i];
+                    sequence.Add(currentRank);
+
+                    if (i > 0)
+                    {
+                        var prevRank = availableRanks[start + i - 1];
+                        if ((int)currentRank - (int)prevRank != 1)
+                        {
+                            isConsecutive = false;
+                            break;
+                        }
+                    }
+
+                    // Check if this rank has enough cards for pairs
+                    if (!rankGroups.ContainsKey(currentRank) || rankGroups[currentRank].Count < 2)
+                    {
+                        isConsecutive = false;
+                        break;
+                    }
+                }
+
+                if (isConsecutive)
+                {
+                    // Generate all combinations of pairs for this sequence
+                    var pairCombinations = sequence.Select(rank =>
+                        GetCombinations(rankGroups[rank], 2)).ToList();
+
+                    // Get cartesian product of all pair combinations
+                    foreach (var combination in GetCartesianProduct(pairCombinations))
+                    {
+                        var allCards = combination.SelectMany(pair => pair).ToList();
+                        var doubleStraight = new DoubleStraightHand(allCards);
+
+                        if (doubleStraight.IsValid())
+                        {
+                            doubleStraights.Add(doubleStraight);
+                        }
+                    }
+                }
+            }
+        }
+
+        return doubleStraights;
     }
 
-    private static IReadOnlyList<Hand> CreateAllTripleStraights(List<Card> cards)
+    private static List<Hand> CreateAllTripleStraights(List<Card> cards)
     {
-        // TODO: Implement triple straight generation
-        // This is complex - need to find consecutive triples
-        return [];
+        var tripleStraights = new List<Hand>();
+
+        // Group cards by rank (excluding 2s as they can't be in straights)
+        var rankGroups = cards
+            .Where(c => c.Rank != CardRank.Two)
+            .GroupBy(c => c.Rank)
+            .Where(g => g.Count() >= 3) // Need at least 3 cards per rank for triples
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        if (rankGroups.Count < 2) // Need at least 2 consecutive triples (minimum triple straight)
+        {
+            return tripleStraights;
+        }
+
+        var availableRanks = rankGroups.Keys.OrderBy(r => r).ToList();
+
+        // Try all possible consecutive sequences (length 2 to max possible)
+        var maxLength = Math.Min(10, availableRanks.Count); // Max 10 triples (3-Q, since A would be 11th)
+
+        for (int length = 2; length <= maxLength; length++)
+        {
+            // Try all possible starting positions
+            for (int start = 0; start <= availableRanks.Count - length; start++)
+            {
+                // Check if we have consecutive ranks
+                bool isConsecutive = true;
+                var sequence = new List<CardRank>();
+
+                for (int i = 0; i < length; i++)
+                {
+                    var currentRank = availableRanks[start + i];
+                    sequence.Add(currentRank);
+
+                    if (i > 0)
+                    {
+                        var prevRank = availableRanks[start + i - 1];
+                        if ((int)currentRank - (int)prevRank != 1)
+                        {
+                            isConsecutive = false;
+                            break;
+                        }
+                    }
+
+                    // Check if this rank has enough cards for triples
+                    if (!rankGroups.ContainsKey(currentRank) || rankGroups[currentRank].Count < 3)
+                    {
+                        isConsecutive = false;
+                        break;
+                    }
+                }
+
+                if (isConsecutive)
+                {
+                    // Generate all combinations of triples for this sequence
+                    var tripleCombinations = sequence.Select(rank =>
+                        GetCombinations(rankGroups[rank], 3)).ToList();
+
+                    // Get cartesian product of all triple combinations
+                    foreach (var combination in GetCartesianProduct(tripleCombinations))
+                    {
+                        var allCards = combination.SelectMany(triple => triple).ToList();
+                        var tripleStraight = new TripleStraightHand(allCards);
+
+                        if (tripleStraight.IsValid())
+                        {
+                            tripleStraights.Add(tripleStraight);
+                        }
+                    }
+                }
+            }
+        }
+
+        return tripleStraights;
     }
 
     #endregion

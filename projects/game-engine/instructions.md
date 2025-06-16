@@ -41,7 +41,6 @@
 - Format code to 100 characters per line maximum.
 - Follow SOLID principles consistently.
 - Design with testability in mind from the start.
-- Ask me before you start writing code.
 
 **Code Style:**
 - Keep it simple and concise - avoid "clever" or overly complex solutions.

@@ -16,11 +16,6 @@ public static class HandFactory
     /// <returns>The strongest valid hand, or null if no valid hand can be formed</returns>
     public static Hand? CreateBestHand(IEnumerable<Card> cards)
     {
-        if (cards == null)
-        {
-            return null;
-        }
-
         var cardList = cards.ToList();
 
         if (cardList.Count == 0)
@@ -69,6 +64,46 @@ public static class HandFactory
     }
 
     /// <summary>
+    /// Creates all possible hands from available cards that can beat the target hand.
+    /// Includes same-type hands that are stronger, and bombs that can beat any non-bomb hand.
+    /// </summary>
+    /// <param name="availableCards">Cards available to form beating hands</param>
+    /// <param name="targetHand">The hand that needs to be beaten</param>
+    /// <returns>All valid hands that can beat the target hand</returns>
+    public static IReadOnlyList<Hand> CreateHandsThatBeat(IEnumerable<Card> availableCards, Hand targetHand)
+    {
+        var cardList = availableCards.ToList();
+
+        if (cardList.Count == 0)
+        {
+            return [];
+        }
+
+        var beatingHands = new List<Hand>();
+
+        // Special case: If target is not a bomb, bombs can beat it
+        if (targetHand.Type != HandType.Bomb)
+        {
+            var bombs = CreateAllBombs(cardList);
+            beatingHands.AddRange(bombs);
+        }
+
+        // Create hands of the same type that are stronger
+        var sameTypeHands = CreateHandsForType(cardList, targetHand.Type);
+
+        // Filter to only include hands that can be compared to the target
+        // For straights, this means same length; for other types, all are comparable
+        var comparableHands = targetHand.Type == HandType.Straight
+            ? sameTypeHands.Where(hand => hand.Cards.Count == targetHand.Cards.Count)
+            : sameTypeHands;
+
+        var strongerHands = comparableHands.Where(hand => hand.CompareTo(targetHand) > 0);
+        beatingHands.AddRange(strongerHands);
+
+        return beatingHands.ToList();
+    }
+
+    /// <summary>
     /// Creates all possible hands of the specified type from the given cards.
     /// For straights, returns all possible lengths (3-card, 4-card, etc.).
     /// </summary>
@@ -77,11 +112,6 @@ public static class HandFactory
     /// <returns>All valid hands of the specified type</returns>
     public static IReadOnlyList<Hand> CreateHandsForType(IEnumerable<Card> cards, HandType handType)
     {
-        if (cards == null)
-        {
-            return [];
-        }
-
         var cardList = cards.ToList();
 
         if (cardList.Count == 0)
@@ -100,6 +130,47 @@ public static class HandFactory
             HandType.Bomb => CreateAllBombs(cardList),
             _ => []
         };
+    }
+
+    /// <summary>
+    /// Creates all valid hands that can be formed from the given cards.
+    /// Returns hands in order of strength (strongest first).
+    /// </summary>
+    /// <param name="cards">Cards to form into hands</param>
+    /// <returns>All valid hands that can be formed</returns>
+    public static IEnumerable<Hand> CreateAllValidHands(IEnumerable<Card> cards)
+    {
+        var cardList = cards.ToList();
+        var validHands = new List<Hand>();
+
+        if (cardList.Count == 0)
+        {
+            return validHands;
+        }
+
+        // Add all bombs
+        validHands.AddRange(CreateAllBombs(cardList));
+
+        // Add all triple straights
+        validHands.AddRange(CreateAllTripleStraights(cardList));
+
+        // Add all double straights
+        validHands.AddRange(CreateAllDoubleStraights(cardList));
+
+        // Add all straights
+        validHands.AddRange(CreateAllStraights(cardList));
+
+        // Add all triples
+        validHands.AddRange(CreateAllTriples(cardList));
+
+        // Add all pairs
+        validHands.AddRange(CreateAllPairs(cardList));
+
+        // Add all singles
+        validHands.AddRange(CreateAllSingles(cardList));
+
+        // Sort by strength (strongest first)
+        return validHands.OrderByDescending(h => h);
     }
 
     #region Private Helper Methods for CreateBestHand

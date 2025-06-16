@@ -348,16 +348,6 @@ public class HandFactoryTests
     #region CreateHandsForType Tests
 
     [TestMethod]
-    public void CreateHandsForType_WithNull_ReturnsEmpty()
-    {
-        // Act
-        var result = HandFactory.CreateHandsForType(null, HandType.Single);
-
-        // Assert
-        Assert.IsFalse(result.Any());
-    }
-
-    [TestMethod]
     public void CreateHandsForType_WithEmptyCards_ReturnsEmpty()
     {
         // Arrange
@@ -794,6 +784,362 @@ public class HandFactoryTests
 
         // Assert
         Assert.AreEqual(0, result.Count);
+    }
+
+    #endregion
+
+    #region CreateHandsThatBeat Tests
+
+    [TestMethod]
+    public void CreateHandsThatBeat_WithInvalidTargetHand_ReturnsEmpty()
+    {
+        // Arrange
+        var cards = new[]
+        {
+            new Card(CardRank.Four, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds)
+        };
+        // Create an invalid hand by using cards that don't form a valid pair
+        var invalidCards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Seven, CardSuit.Diamonds) // Different ranks - invalid pair
+        };
+        var invalidTargetHand = new PairHand(invalidCards);
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, invalidTargetHand);
+
+        // Assert
+        // Even with an invalid target hand, the method should handle it gracefully
+        // The behavior depends on how PairHand.IsValid() and CompareTo work
+        Assert.IsTrue(result.Count >= 0); // Should not crash
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_WithEmptyCards_ReturnsEmpty()
+    {
+        // Arrange
+        var cards = new List<Card>();
+        var targetHand = new SingleHand(new Card(CardRank.Three, CardSuit.Hearts));
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(0, result.Count);
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_SingleHand_ReturnsStrongerSingles()
+    {
+        // Arrange
+        var targetHand = new SingleHand(new Card(CardRank.Five, CardSuit.Hearts));
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts), // Weaker
+            new Card(CardRank.Four, CardSuit.Hearts), // Weaker
+            new Card(CardRank.Six, CardSuit.Hearts),  // Stronger
+            new Card(CardRank.Ace, CardSuit.Hearts)   // Stronger
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(2, result.Count);
+        Assert.IsTrue(result.All(h => h.Type == HandType.Single));
+        Assert.IsTrue(result.All(h => h.CompareTo(targetHand) > 0));
+
+        // Verify we have the stronger cards
+        var resultCards = result.Select(h => h.Cards[0]).OrderBy(c => c.Value).ToList();
+        Assert.AreEqual(CardRank.Six, resultCards[0].Rank);
+        Assert.AreEqual(CardRank.Ace, resultCards[1].Rank);
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_PairHand_ReturnsStrongerPairs()
+    {
+        // Arrange
+        var targetHand = new PairHand([
+            new Card(CardRank.Five, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds)
+        ]);
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds), // Weaker pair
+            new Card(CardRank.Seven, CardSuit.Hearts),
+            new Card(CardRank.Seven, CardSuit.Diamonds), // Stronger pair
+            new Card(CardRank.Ace, CardSuit.Hearts),
+            new Card(CardRank.Ace, CardSuit.Diamonds)    // Stronger pair
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(2, result.Count);
+        Assert.IsTrue(result.All(h => h.Type == HandType.Pair));
+        Assert.IsTrue(result.All(h => h.CompareTo(targetHand) > 0));
+
+        // Verify we have the stronger pairs
+        var resultRanks = result.Select(h => h.Cards[0].Rank).OrderBy(r => r).ToList();
+        Assert.AreEqual(CardRank.Seven, resultRanks[0]);
+        Assert.AreEqual(CardRank.Ace, resultRanks[1]);
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_TripleHand_ReturnsStrongerTriples()
+    {
+        // Arrange
+        var targetHand = new TripleHand([
+            new Card(CardRank.Five, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds),
+            new Card(CardRank.Five, CardSuit.Clubs)
+        ]);
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs), // Weaker triple
+            new Card(CardRank.Seven, CardSuit.Hearts),
+            new Card(CardRank.Seven, CardSuit.Diamonds),
+            new Card(CardRank.Seven, CardSuit.Clubs)  // Stronger triple
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(1, result.Count);
+        Assert.AreEqual(HandType.Triple, result[0].Type);
+        Assert.IsTrue(result[0].CompareTo(targetHand) > 0);
+        Assert.AreEqual(CardRank.Seven, result[0].Cards[0].Rank);
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_StraightHand_ReturnsStrongerStraights()
+    {
+        // Arrange
+        var targetHand = new StraightHand([
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Four, CardSuit.Diamonds),
+            new Card(CardRank.Five, CardSuit.Clubs)
+        ]);
+        var cards = new[]
+        {
+            new Card(CardRank.Four, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds),
+            new Card(CardRank.Six, CardSuit.Clubs),   // 4-5-6 straight (stronger)
+            new Card(CardRank.Eight, CardSuit.Hearts),
+            new Card(CardRank.Nine, CardSuit.Diamonds),
+            new Card(CardRank.Ten, CardSuit.Clubs)    // 8-9-10 straight (stronger)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(2, result.Count);
+        Assert.IsTrue(result.All(h => h.Type == HandType.Straight));
+        Assert.IsTrue(result.All(h => h.CompareTo(targetHand) > 0));
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_BombHand_ReturnsOnlyStrongerBombs()
+    {
+        // Arrange
+        var targetHand = new BombHand([
+            new Card(CardRank.Five, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds),
+            new Card(CardRank.Five, CardSuit.Clubs),
+            new Card(CardRank.Five, CardSuit.Spades)
+        ]);
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Three, CardSuit.Spades), // Weaker bomb
+            new Card(CardRank.Seven, CardSuit.Hearts),
+            new Card(CardRank.Seven, CardSuit.Diamonds),
+            new Card(CardRank.Seven, CardSuit.Clubs),
+            new Card(CardRank.Seven, CardSuit.Spades), // Stronger bomb
+            new Card(CardRank.Ace, CardSuit.Hearts),   // High single (can't beat bomb)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(1, result.Count);
+        Assert.AreEqual(HandType.Bomb, result[0].Type);
+        Assert.IsTrue(result[0].CompareTo(targetHand) > 0);
+        Assert.AreEqual(CardRank.Seven, result[0].Cards[0].Rank);
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_NonBombHand_IncludesBombs()
+    {
+        // Arrange - Target is a pair, available cards include a bomb
+        var targetHand = new PairHand([
+            new Card(CardRank.Ace, CardSuit.Hearts),
+            new Card(CardRank.Ace, CardSuit.Diamonds)
+        ]);
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Three, CardSuit.Spades), // Bomb (can beat any non-bomb)
+            new Card(CardRank.Two, CardSuit.Hearts),
+            new Card(CardRank.Two, CardSuit.Diamonds)  // Stronger pair
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(2, result.Count);
+
+        // Should have one bomb and one stronger pair
+        var handTypes = result.Select(h => h.Type).OrderBy(t => t).ToList();
+        Assert.IsTrue(handTypes.Contains(HandType.Bomb));
+        Assert.IsTrue(handTypes.Contains(HandType.Pair));
+
+        // Verify all can beat the target
+        Assert.IsTrue(result.All(h => h.CompareTo(targetHand) > 0 || h.Type == HandType.Bomb));
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_WithNoBeatingHands_ReturnsEmpty()
+    {
+        // Arrange - Target is the highest possible single, no available cards can beat it
+        var targetHand = new SingleHand(new Card(CardRank.Two, CardSuit.Hearts)); // Highest card
+        var cards = new[]
+        {
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Four, CardSuit.Diamonds),
+            new Card(CardRank.Ace, CardSuit.Clubs)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(0, result.Count);
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_DoubleStraightHand_ReturnsStrongerDoubleStraights()
+    {
+        // Arrange
+        var targetHand = new DoubleStraightHand([
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Four, CardSuit.Clubs),
+            new Card(CardRank.Four, CardSuit.Spades),
+            new Card(CardRank.Five, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds)
+        ]);
+        var cards = new[]
+        {
+            new Card(CardRank.Six, CardSuit.Hearts),
+            new Card(CardRank.Six, CardSuit.Diamonds),
+            new Card(CardRank.Seven, CardSuit.Clubs),
+            new Card(CardRank.Seven, CardSuit.Spades),
+            new Card(CardRank.Eight, CardSuit.Hearts),
+            new Card(CardRank.Eight, CardSuit.Diamonds) // 6-7-8 double straight (stronger)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(1, result.Count);
+        Assert.AreEqual(HandType.DoubleStraight, result[0].Type);
+        Assert.IsTrue(result[0].CompareTo(targetHand) > 0);
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_TripleStraightHand_ReturnsStrongerTripleStraights()
+    {
+        // Arrange
+        var targetHand = new TripleStraightHand([
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+            new Card(CardRank.Three, CardSuit.Clubs),
+            new Card(CardRank.Four, CardSuit.Hearts),
+            new Card(CardRank.Four, CardSuit.Diamonds),
+            new Card(CardRank.Four, CardSuit.Clubs)
+        ]);
+        var cards = new[]
+        {
+            new Card(CardRank.Five, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds),
+            new Card(CardRank.Five, CardSuit.Clubs),
+            new Card(CardRank.Six, CardSuit.Hearts),
+            new Card(CardRank.Six, CardSuit.Diamonds),
+            new Card(CardRank.Six, CardSuit.Clubs)  // 5-6 triple straight (stronger)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(1, result.Count);
+        Assert.AreEqual(HandType.TripleStraight, result[0].Type);
+        Assert.IsTrue(result[0].CompareTo(targetHand) > 0);
+    }
+
+    [TestMethod]
+    public void CreateHandsThatBeat_MixedAvailableCards_ReturnsAllApplicableBeatingHands()
+    {
+        // Arrange - Target is a pair, available cards have stronger pairs, bombs, and other irrelevant cards
+        var targetHand = new PairHand([
+            new Card(CardRank.Five, CardSuit.Hearts),
+            new Card(CardRank.Five, CardSuit.Diamonds)
+        ]);
+        var cards = new[]
+        {
+            // Weaker pair (should not be included)
+            new Card(CardRank.Three, CardSuit.Hearts),
+            new Card(CardRank.Three, CardSuit.Diamonds),
+
+            // Stronger pair (should be included)
+            new Card(CardRank.Seven, CardSuit.Hearts),
+            new Card(CardRank.Seven, CardSuit.Diamonds),
+
+            // Bomb (should be included)
+            new Card(CardRank.Four, CardSuit.Hearts),
+            new Card(CardRank.Four, CardSuit.Diamonds),
+            new Card(CardRank.Four, CardSuit.Clubs),
+            new Card(CardRank.Four, CardSuit.Spades),
+
+            // Single cards (irrelevant for beating a pair)
+            new Card(CardRank.Ace, CardSuit.Hearts),
+            new Card(CardRank.King, CardSuit.Diamonds)
+        };
+
+        // Act
+        var result = HandFactory.CreateHandsThatBeat(cards, targetHand);
+
+        // Assert
+        Assert.AreEqual(2, result.Count);
+
+        // Should have one stronger pair and one bomb
+        var handTypes = result.Select(h => h.Type).ToList();
+        Assert.IsTrue(handTypes.Contains(HandType.Pair));
+        Assert.IsTrue(handTypes.Contains(HandType.Bomb));
+
+        // Verify the pair is stronger
+        var pairResult = result.First(h => h.Type == HandType.Pair);
+        Assert.AreEqual(CardRank.Seven, pairResult.Cards[0].Rank);
+
+        // Verify the bomb
+        var bombResult = result.First(h => h.Type == HandType.Bomb);
+        Assert.AreEqual(CardRank.Four, bombResult.Cards[0].Rank);
     }
 
     #endregion

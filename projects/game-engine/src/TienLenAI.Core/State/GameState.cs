@@ -5,14 +5,17 @@ namespace TienLenAI.Core.State;
 
 public class GameState
 {
-    public IReadOnlyList<Player> Players { get; private set; }
-    public int CurrentPlayerIndex { get; private set; }
-    public TrickState CurrentTrick { get; private set; }
-    public IReadOnlyList<TrickState> TrickHistory { get; private set; }
+    // Private implementation details
+    private List<Player> players;
+    private int currentPlayerIndex;
+    private TrickState currentTrick;
+    private List<int> finishOrder;
+    private bool isFirstGame;
+    private bool hasFirstPlayBeenMade;
+    private List<TrickState> trickHistory;
+
+    // Essential public state
     public bool IsGameComplete { get; private set; }
-    public List<int> FinishOrder { get; private set; }
-    public bool IsFirstGame { get; private set; }
-    public bool HasFirstPlayBeenMade { get; private set; }
     public int TrickNumber { get; private set; }
 
     public GameState(List<Player> players, bool isFirstGame = true)
@@ -22,17 +25,17 @@ public class GameState
             throw new ArgumentException("Game requires exactly 4 players", nameof(players));
         }
 
-        Players = players.AsReadOnly();
-        IsFirstGame = isFirstGame;
-        FinishOrder = [];
-        TrickHistory = [];
+        this.players = players;
+        this.isFirstGame = isFirstGame;
+        this.finishOrder = [];
+        this.trickHistory = [];
         IsGameComplete = false;
-        HasFirstPlayBeenMade = false;
+        hasFirstPlayBeenMade = false;
         TrickNumber = 1;
 
         // Set starting player based on game type
-        CurrentPlayerIndex = DetermineStartingPlayer();
-        CurrentTrick = new TrickState(CurrentPlayerIndex, Players.Count);
+        currentPlayerIndex = DetermineStartingPlayer();
+        currentTrick = new TrickState(currentPlayerIndex, this.players.Count);
     }
 
     /// <summary>
@@ -40,8 +43,40 @@ public class GameState
     /// </summary>
     public Player GetCurrentPlayer()
     {
-        return Players[CurrentPlayerIndex];
+        return players[currentPlayerIndex];
     }
+
+    /// <summary>
+    /// Gets a specific player by index
+    /// </summary>
+    public Player GetPlayer(int index)
+    {
+        if (index < 0 || index >= players.Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index));
+        }
+        return players[index];
+    }
+
+    /// <summary>
+    /// Gets the total number of players
+    /// </summary>
+    public int PlayerCount => players.Count;
+
+    /// <summary>
+    /// Gets the current player's index
+    /// </summary>
+    public int CurrentPlayerIndex => currentPlayerIndex;
+
+    /// <summary>
+    /// Gets the current trick state
+    /// </summary>
+    public TrickState CurrentTrick => currentTrick;
+
+    /// <summary>
+    /// Gets the finish order (readonly)
+    /// </summary>
+    public IReadOnlyList<int> FinishOrder => finishOrder.AsReadOnly();
 
     /// <summary>
     /// Attempts to play a hand for the current player
@@ -62,20 +97,23 @@ public class GameState
         // Remove cards from player's hand
         var currentPlayer = GetCurrentPlayer();
         var newHand = RemoveCardsFromHand(currentPlayer.Hand, hand.Cards);
-        var updatedPlayers = UpdatePlayerHand(CurrentPlayerIndex, newHand);
+        var updatedPlayers = UpdatePlayerHand(currentPlayerIndex, newHand);
 
         // Update trick state
-        var newTrickState = CurrentTrick.WithPlayerPlay(hand, CurrentPlayerIndex);
+        var newTrickState = currentTrick.WithPlayerPlay(hand, currentPlayerIndex);
 
         // Check if player finished
-        var newFinishOrder = new List<int>(FinishOrder);
+        var newFinishOrder = new List<int>(finishOrder);
         if (newHand.Count == 0)
         {
-            newFinishOrder.Add(CurrentPlayerIndex);
+            newFinishOrder.Add(currentPlayerIndex);
         }
 
-        // Determine next player and update history
-        var (nextPlayerIndex, newTrickHistory, newTrickNumber, updatedTrickState) = DetermineNextPlayerAndUpdateHistory(newTrickState, newFinishOrder);
+        // Update trick history if needed
+        var (updatedTrickState, newTrickHistory, newTrickNumber) = UpdateTrickHistory(newTrickState);
+
+        // Determine next player
+        var nextPlayerIndex = DetermineNextPlayer(updatedTrickState, newFinishOrder);
 
         return new GameState(
             updatedPlayers,
@@ -83,7 +121,7 @@ public class GameState
             updatedTrickState,
             newTrickHistory,
             newFinishOrder,
-            IsFirstGame,
+            isFirstGame,
             true,
             newTrickNumber);
     }
@@ -97,26 +135,28 @@ public class GameState
         {
             throw new InvalidOperationException("Cannot pass on a completed game");
         }
-
-        if (CurrentTrick.CurrentHand == null)
+        if (currentTrick.CurrentHand == null)
         {
             throw new InvalidOperationException("Cannot pass when no hand has been played");
         }
 
         // Update trick state with pass
-        var newTrickState = CurrentTrick.WithPlayerPass(CurrentPlayerIndex);
+        var newTrickState = currentTrick.WithPlayerPass(currentPlayerIndex);
 
-        // Determine next player and update history
-        var (nextPlayerIndex, newTrickHistory, newTrickNumber, updatedTrickState) = DetermineNextPlayerAndUpdateHistory(newTrickState, FinishOrder);
+        // Update trick history if needed
+        var (updatedTrickState, newTrickHistory, newTrickNumber) = UpdateTrickHistory(newTrickState);
+
+        // Determine next player
+        var nextPlayerIndex = DetermineNextPlayer(updatedTrickState, finishOrder);
 
         return new GameState(
-            Players.ToList(),
+            players,
             nextPlayerIndex,
             updatedTrickState,
             newTrickHistory,
-            FinishOrder,
-            IsFirstGame,
-            HasFirstPlayBeenMade,
+            finishOrder,
+            isFirstGame,
+            hasFirstPlayBeenMade,
             newTrickNumber);
     }
 
@@ -138,7 +178,7 @@ public class GameState
         }
 
         // First play must include 3♠ if it's the first game and first play
-        if (IsFirstGame && !HasFirstPlayBeenMade)
+        if (isFirstGame && !hasFirstPlayBeenMade)
         {
             var threeOfSpades = new Card(CardRank.Three, CardSuit.Spades);
             if (!hand.Cards.Contains(threeOfSpades))
@@ -148,7 +188,7 @@ public class GameState
         }
 
         // Check trick-level validity
-        return CurrentTrick.IsLegalPlay(hand);
+        return currentTrick.IsLegalPlay(hand);
     }
 
     /// <summary>
@@ -156,8 +196,8 @@ public class GameState
     /// </summary>
     public IEnumerable<int> GetActivePlayers()
     {
-        return CurrentTrick.GetActivePlayers()
-            .Where(playerIndex => !FinishOrder.Contains(playerIndex));
+        return currentTrick.GetActivePlayers()
+            .Where(playerIndex => !finishOrder.Contains(playerIndex));
     }
 
     /// <summary>
@@ -165,7 +205,7 @@ public class GameState
     /// </summary>
     public IEnumerable<TrickState> GetCompletedTricks()
     {
-        return TrickHistory;
+        return trickHistory;
     }
 
     /// <summary>
@@ -173,7 +213,7 @@ public class GameState
     /// </summary>
     public TrickState? GetLastCompletedTrick()
     {
-        return TrickHistory.LastOrDefault();
+        return trickHistory.LastOrDefault();
     }
 
     /// <summary>
@@ -181,14 +221,14 @@ public class GameState
     /// </summary>
     public IEnumerable<Hand> GetPlayerHandHistory(int playerIndex)
     {
-        if (playerIndex < 0 || playerIndex >= Players.Count)
+        if (playerIndex < 0 || playerIndex >= players.Count)
         {
             throw new ArgumentOutOfRangeException(nameof(playerIndex));
         }
 
         var hands = new List<Hand>();
-        
-        foreach (var trick in TrickHistory)
+
+        foreach (var trick in trickHistory)
         {
             if (trick.LastPlayingPlayerIndex == playerIndex && trick.CurrentHand != null)
             {
@@ -197,9 +237,9 @@ public class GameState
         }
 
         // Add current trick if this player has played
-        if (CurrentTrick.LastPlayingPlayerIndex == playerIndex && CurrentTrick.CurrentHand != null)
+        if (currentTrick.LastPlayingPlayerIndex == playerIndex && currentTrick.CurrentHand != null)
         {
-            hands.Add(CurrentTrick.CurrentHand);
+            hands.Add(currentTrick.CurrentHand);
         }
 
         return hands;
@@ -211,13 +251,13 @@ public class GameState
     public Dictionary<int, int> GetTrickWinCounts()
     {
         var winCounts = new Dictionary<int, int>();
-        
-        for (int i = 0; i < Players.Count; i++)
+
+        for (int i = 0; i < players.Count; i++)
         {
             winCounts[i] = 0;
         }
 
-        foreach (var trick in TrickHistory.Where(t => t.IsComplete))
+        foreach (var trick in trickHistory.Where(t => t.IsComplete))
         {
             winCounts[trick.LastPlayingPlayerIndex]++;
         }
@@ -231,13 +271,13 @@ public class GameState
     public Dictionary<int, int> GetCardsPlayedCounts()
     {
         var cardCounts = new Dictionary<int, int>();
-        
-        for (int i = 0; i < Players.Count; i++)
+
+        for (int i = 0; i < players.Count; i++)
         {
             cardCounts[i] = 0;
         }
 
-        foreach (var trick in TrickHistory)
+        foreach (var trick in trickHistory)
         {
             if (trick.CurrentHand != null)
             {
@@ -246,9 +286,9 @@ public class GameState
         }
 
         // Add current trick if someone has played
-        if (CurrentTrick.CurrentHand != null)
+        if (currentTrick.CurrentHand != null)
         {
-            cardCounts[CurrentTrick.LastPlayingPlayerIndex] += CurrentTrick.CurrentHand.Cards.Count;
+            cardCounts[currentTrick.LastPlayingPlayerIndex] += currentTrick.CurrentHand.Cards.Count;
         }
 
         return cardCounts;
@@ -261,7 +301,7 @@ public class GameState
     {
         var handTypes = new HashSet<HandType>();
 
-        foreach (var trick in TrickHistory)
+        foreach (var trick in trickHistory)
         {
             if (trick.CurrentHand != null)
             {
@@ -269,9 +309,9 @@ public class GameState
             }
         }
 
-        if (CurrentTrick.CurrentHand != null)
+        if (currentTrick.CurrentHand != null)
         {
-            handTypes.Add(CurrentTrick.CurrentHand.Type);
+            handTypes.Add(currentTrick.CurrentHand.Type);
         }
 
         return handTypes;
@@ -284,26 +324,26 @@ public class GameState
         List<Player> players,
         int currentPlayerIndex,
         TrickState currentTrick,
-        IReadOnlyList<TrickState> trickHistory,
+        List<TrickState> trickHistory,
         List<int> finishOrder,
         bool isFirstGame,
         bool hasFirstPlayBeenMade,
         int trickNumber)
     {
-        Players = players.AsReadOnly();
-        CurrentPlayerIndex = currentPlayerIndex;
-        CurrentTrick = currentTrick;
-        TrickHistory = trickHistory;
-        FinishOrder = finishOrder;
-        IsFirstGame = isFirstGame;
-        HasFirstPlayBeenMade = hasFirstPlayBeenMade;
+        this.players = players;
+        this.currentPlayerIndex = currentPlayerIndex;
+        this.currentTrick = currentTrick;
+        this.trickHistory = trickHistory;
+        this.finishOrder = finishOrder;
+        this.isFirstGame = isFirstGame;
+        this.hasFirstPlayBeenMade = hasFirstPlayBeenMade;
         TrickNumber = trickNumber;
         IsGameComplete = finishOrder.Count >= 3; // Game ends when 3 players finish
     }
 
     private int DetermineStartingPlayer()
     {
-        if (!IsFirstGame)
+        if (!isFirstGame)
         {
             // Winner of previous game starts (this would be passed in constructor in real implementation)
             return 0; // Placeholder - should be winner from previous game
@@ -311,9 +351,9 @@ public class GameState
 
         // First game: find player with 3♠
         var threeOfSpades = new Card(CardRank.Three, CardSuit.Spades);
-        for (int i = 0; i < Players.Count; i++)
+        for (int i = 0; i < players.Count; i++)
         {
-            if (Players[i].Hand.Contains(threeOfSpades))
+            if (players[i].Hand.Contains(threeOfSpades))
             {
                 return i;
             }
@@ -322,19 +362,36 @@ public class GameState
         throw new InvalidOperationException("No player has 3♠ - invalid game setup");
     }
 
-    private (int nextPlayerIndex, IReadOnlyList<TrickState> trickHistory, int trickNumber, TrickState currentTrick) DetermineNextPlayerAndUpdateHistory(TrickState trickState, List<int> finishOrder)
+    /// <summary>
+    /// Updates trick history when a trick is completed
+    /// </summary>
+    private (TrickState trickState, List<TrickState> trickHistory, int trickNumber) UpdateTrickHistory(TrickState trickState)
     {
-        var newTrickHistory = TrickHistory.ToList();
-        var newTrickNumber = TrickNumber;
+        if (!trickState.IsComplete)
+        {
+            // Trick not complete, no history update needed
+            return (trickState, trickHistory, TrickNumber);
+        }
 
+        // Trick completed - add to history and start new trick
+        var newTrickHistory = trickHistory.ToList();
+        newTrickHistory.Add(trickState);
+
+        var winner = trickState.LastPlayingPlayerIndex;
+        var newTrick = trickState.StartNewTrick(winner);
+
+        return (newTrick, newTrickHistory, TrickNumber + 1);
+    }
+
+    /// <summary>
+    /// Determines the next player to play
+    /// </summary>
+    private int DetermineNextPlayer(TrickState trickState, IReadOnlyList<int> finishOrder)
+    {
         if (trickState.IsComplete)
         {
-            // Trick completed - add to history and start new trick
-            newTrickHistory.Add(trickState);
-            var winner = trickState.LastPlayingPlayerIndex;
-            var newTrick = trickState.StartNewTrick(winner);
-            newTrickNumber++;
-            return (winner, newTrickHistory.AsReadOnly(), newTrickNumber, newTrick);
+            // Trick just completed, winner starts the new trick
+            return trickState.LastPlayingPlayerIndex;
         }
 
         // Find next active player who hasn't finished
@@ -344,13 +401,13 @@ public class GameState
             nextPlayer = trickState.GetNextPlayer(nextPlayer.Value);
         }
 
-        return (nextPlayer ?? CurrentPlayerIndex, newTrickHistory.AsReadOnly(), newTrickNumber, trickState);
+        return nextPlayer ?? CurrentPlayerIndex;
     }
 
     private bool HasAllCards(List<Card> playerHand, IReadOnlyList<Card> requiredCards)
     {
         var handCopy = new List<Card>(playerHand);
-        
+
         foreach (var card in requiredCards)
         {
             if (!handCopy.Remove(card))
@@ -358,38 +415,37 @@ public class GameState
                 return false;
             }
         }
-        
+
         return true;
     }
 
     private List<Card> RemoveCardsFromHand(List<Card> hand, IReadOnlyList<Card> cardsToRemove)
     {
         var newHand = new List<Card>(hand);
-        
+
         foreach (var card in cardsToRemove)
         {
             newHand.Remove(card);
         }
-        
+
         return newHand;
     }
-
     private List<Player> UpdatePlayerHand(int playerIndex, List<Card> newHand)
     {
         var updatedPlayers = new List<Player>();
-        
-        for (int i = 0; i < Players.Count; i++)
+
+        for (int i = 0; i < players.Count; i++)
         {
             if (i == playerIndex)
             {
-                updatedPlayers.Add(new Player(Players[i].Name, newHand));
+                updatedPlayers.Add(new Player(players[i].Name, newHand));
             }
             else
             {
-                updatedPlayers.Add(Players[i]);
+                updatedPlayers.Add(players[i]);
             }
         }
-        
+
         return updatedPlayers;
     }
 }

@@ -77,11 +77,10 @@ public class GameStateTests
         var gameState = new GameState(players, isFirstGame: true);
 
         // Assert
-        Assert.AreEqual(4, gameState.Players.Count);
+        Assert.AreEqual(4, gameState.PlayerCount);
         Assert.AreEqual("Player1", gameState.GetCurrentPlayer().Name); // Player1 has 3♠
         Assert.IsFalse(gameState.IsGameComplete);
-        Assert.IsTrue(gameState.IsFirstGame);
-        Assert.IsFalse(gameState.HasFirstPlayBeenMade);
+        Assert.AreEqual(1, gameState.TrickNumber);
         Assert.AreEqual(0, gameState.FinishOrder.Count);
     }
 
@@ -163,9 +162,8 @@ public class GameStateTests
         var newState = gameState.PlayHand(hand);
 
         // Assert
-        Assert.IsTrue(newState.HasFirstPlayBeenMade);
         // Check the player who played (original current player) has one less card
-        Assert.AreEqual(4, newState.Players[originalCurrentPlayerIndex].Hand.Count);
+        Assert.AreEqual(4, newState.GetPlayer(originalCurrentPlayerIndex).Hand.Count);
         Assert.IsNotNull(newState.CurrentTrick.CurrentHand);
         Assert.AreEqual(HandType.Single, newState.CurrentTrick.RequiredHandType);
     }
@@ -198,7 +196,7 @@ public class GameStateTests
         var gameState = new GameState(players, isFirstGame: true);
 
         // Assert
-        Assert.AreEqual(0, gameState.TrickHistory.Count);
+        Assert.AreEqual(0, gameState.GetCompletedTricks().Count());
         Assert.AreEqual(1, gameState.TrickNumber);
         Assert.IsNull(gameState.GetLastCompletedTrick());
     }
@@ -280,7 +278,7 @@ public class GameStateTests
         var gameState = new GameState(players, isFirstGame: true);
 
         // Initially no completed tricks
-        Assert.AreEqual(0, gameState.TrickHistory.Count);
+        Assert.AreEqual(0, gameState.GetCompletedTricks().Count());
         Assert.AreEqual(1, gameState.TrickNumber);
 
         // All players should have 0 trick wins initially

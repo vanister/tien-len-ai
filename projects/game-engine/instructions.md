@@ -5,7 +5,9 @@
 - Follow .NET community best practices and conventions.
 - Consider the specific requirements and existing infrastructure.
 - Use MSTest for unit testing.
-  - Try and aim for 90% coverage.
+  - Try and aim for 80% coverage.
+  - Make sure to test business rules/logic instead of boilerplate code
+  - Ask me before writing tests
 - Keep nuget/dotnet tools installs locally.
 
 **Code Organization:**

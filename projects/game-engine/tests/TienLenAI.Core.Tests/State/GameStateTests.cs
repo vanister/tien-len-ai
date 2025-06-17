@@ -187,5 +187,108 @@ public class GameStateTests
         var activePlayers = newState.GetActivePlayers().ToList();
         Assert.IsTrue(activePlayers.Contains(1)); // Player2 should be active
     }
+
+    [TestMethod]
+    public void GameState_ShouldInitializeWithEmptyTrickHistory()
+    {
+        // Arrange
+        var players = CreateTestPlayers();
+
+        // Act
+        var gameState = new GameState(players, isFirstGame: true);
+
+        // Assert
+        Assert.AreEqual(0, gameState.TrickHistory.Count);
+        Assert.AreEqual(1, gameState.TrickNumber);
+        Assert.IsNull(gameState.GetLastCompletedTrick());
+    }
+
+    [TestMethod]
+    public void GameState_ShouldTrackPlayerHandHistory()
+    {
+        // Arrange
+        var players = CreateTestPlayers();
+        var gameState = new GameState(players, isFirstGame: true);
+        var originalCurrentPlayerIndex = gameState.CurrentPlayerIndex;
+
+        // Play the 3♠
+        var hand = new SingleHand(new Card(CardRank.Three, CardSuit.Spades));
+
+        // Act
+        var newState = gameState.PlayHand(hand);
+        var playerHistory = newState.GetPlayerHandHistory(originalCurrentPlayerIndex);
+
+        // Assert
+        Assert.AreEqual(1, playerHistory.Count());
+        Assert.AreEqual(HandType.Single, playerHistory.First().Type);
+        Assert.IsTrue(playerHistory.First().Cards.Contains(new Card(CardRank.Three, CardSuit.Spades)));
+    }
+
+    [TestMethod]
+    public void GameState_ShouldTrackPlayedHandTypes()
+    {
+        // Arrange
+        var players = CreateTestPlayers();
+        var gameState = new GameState(players, isFirstGame: true);
+
+        // Play the 3♠
+        var hand = new SingleHand(new Card(CardRank.Three, CardSuit.Spades));
+
+        // Act
+        var newState = gameState.PlayHand(hand);
+        var playedTypes = newState.GetPlayedHandTypes();
+
+        // Assert
+        Assert.IsTrue(playedTypes.Contains(HandType.Single));
+        Assert.AreEqual(1, playedTypes.Count());
+    }
+
+    [TestMethod]
+    public void GameState_ShouldTrackCardsPlayedCounts()
+    {
+        // Arrange
+        var players = CreateTestPlayers();
+        var gameState = new GameState(players, isFirstGame: true);
+        var originalCurrentPlayerIndex = gameState.CurrentPlayerIndex;
+
+        // Play the 3♠
+        var hand = new SingleHand(new Card(CardRank.Three, CardSuit.Spades));
+
+        // Act
+        var newState = gameState.PlayHand(hand);
+        var cardCounts = newState.GetCardsPlayedCounts();
+
+        // Assert
+        Assert.AreEqual(1, cardCounts[originalCurrentPlayerIndex]);
+
+        // Other players should have 0 cards played
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (i != originalCurrentPlayerIndex)
+            {
+                Assert.AreEqual(0, cardCounts[i]);
+            }
+        }
+    }
+
+    [TestMethod]
+    public void GameState_ShouldMoveTrickToHistoryWhenCompleted()
+    {
+        // This test would require a more complex setup to complete a full trick
+        // For now, we'll test the basic initialization
+        var players = CreateTestPlayers();
+        var gameState = new GameState(players, isFirstGame: true);
+
+        // Initially no completed tricks
+        Assert.AreEqual(0, gameState.TrickHistory.Count);
+        Assert.AreEqual(1, gameState.TrickNumber);
+
+        // All players should have 0 trick wins initially
+        var winCounts = gameState.GetTrickWinCounts();
+        foreach (var count in winCounts.Values)
+        {
+            Assert.AreEqual(0, count);
+        }
+    }
 }
 

@@ -82,10 +82,36 @@ public static class GameFlowExample
         Console.WriteLine($"Game complete: {gameState.IsGameComplete}");
         Console.WriteLine($"Players finished: {gameState.FinishOrder.Count}");
         Console.WriteLine($"First play made: {gameState.HasFirstPlayBeenMade}");
+        Console.WriteLine($"Current trick number: {gameState.TrickNumber}");
+        Console.WriteLine($"Completed tricks: {gameState.TrickHistory.Count}");
+        Console.WriteLine();
 
+        Console.WriteLine("=== Trick History Analysis ===");
+        var cardCounts = gameState.GetCardsPlayedCounts();
+        var winCounts = gameState.GetTrickWinCounts();
+        var playedTypes = gameState.GetPlayedHandTypes();
+
+        Console.WriteLine("Cards played by each player:");
         for (int i = 0; i < gameState.Players.Count; i++)
         {
-            Console.WriteLine($"Player {i} ({gameState.Players[i].Name}): {gameState.Players[i].Hand.Count} cards");
+            Console.WriteLine($"  Player {i} ({gameState.Players[i].Name}): {cardCounts[i]} cards, {winCounts[i]} tricks won");
+        }
+
+        Console.WriteLine($"Hand types played: {string.Join(", ", playedTypes)}");
+        Console.WriteLine();
+
+        Console.WriteLine("=== Player Hand Status ===");
+        for (int i = 0; i < gameState.Players.Count; i++)
+        {
+            var playerHistory = gameState.GetPlayerHandHistory(i);
+            Console.WriteLine($"Player {i} ({gameState.Players[i].Name}):");
+            Console.WriteLine($"  Current cards: {gameState.Players[i].Hand.Count}");
+            Console.WriteLine($"  Hands played: {playerHistory.Count()}");
+
+            if (playerHistory.Any())
+            {
+                Console.WriteLine($"  Hand history: {string.Join(", ", playerHistory.Select(FormatHand))}");
+            }
         }
     }
 

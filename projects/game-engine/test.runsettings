@@ -14,7 +14,6 @@
               <Exclude>
                 <Source>.*\\tests\\.*</Source>
                 <Source>.*\\Tests\\.*</Source>
-                <Source>.*\\Examples\\.*</Source>
               </Exclude>
             </Sources>
             <UseVerifiableInstrumentation>True</UseVerifiableInstrumentation>

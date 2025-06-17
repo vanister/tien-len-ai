@@ -7,15 +7,16 @@
                      assemblyQualifiedName="Microsoft.VisualStudio.Coverage.DynamicCoverageDataCollector, Microsoft.VisualStudio.TraceCollector, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
         <Configuration>
           <CodeCoverage>
-            <ModulePaths>
+            <Sources>
               <Include>
-                <ModulePath>.*\.dll$</ModulePath>
+                <Source>.*\\src\\.*</Source>
               </Include>
               <Exclude>
-                <ModulePath>.*Tests\.dll$</ModulePath>
-                <ModulePath>.*Test\.dll$</ModulePath>
+                <Source>.*\\tests\\.*</Source>
+                <Source>.*\\Tests\\.*</Source>
+                <Source>.*\\Examples\\.*</Source>
               </Exclude>
-            </ModulePaths>
+            </Sources>
             <UseVerifiableInstrumentation>True</UseVerifiableInstrumentation>
             <AllowLowIntegrityProcesses>True</AllowLowIntegrityProcesses>
             <CollectFromChildProcesses>True</CollectFromChildProcesses>

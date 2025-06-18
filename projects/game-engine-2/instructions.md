@@ -1,38 +1,67 @@
 # TienLenAi2 Development Instructions
 
-This document outlines the development guidelines and best practices for the TienLenAi2 solution.
+> **Project Goal**: Build an AI engine for Tiến Lên (Vietnamese Thirteen) card game
 
-## Core Development Rules
+This document outlines development guidelines and best practices for the TienLenAi2 solution.
 
-### 1. Follow .NET and C# Best Practices
+---
 
-- **Naming Conventions**: Use PascalCase for classes, methods, and properties; camelCase for fields and local variables
-- **Code Organization**: Follow the standard .NET project structure and namespace conventions
-- **One Type Per File**: Each class, enum, interface, or record should be in its own separate file
-- **SOLID Principles**: Design classes following Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion principles
-- **Async/Await**: Use async/await patterns properly for asynchronous operations
-- **Nullable Reference Types**: Leverage C# nullable reference types (enabled in this project) to prevent null reference exceptions
-- **Exception Handling**: Use appropriate exception types and handle exceptions at the right level
-- **Resource Management**: Use `using` statements and implement `IDisposable` when managing resources
+## 📖 Game Context
 
-### 2. Use Defensive Coding Techniques
+**IMPORTANT**: Before contributing, familiarize yourself with the game rules in [`docs/game-rules.md`](docs/game-rules.md).
 
-- **Input Validation**: Always validate method parameters, especially public APIs
-- **Null Checks**: Perform null checks on arguments and return values where appropriate
-- **Guard Clauses**: Use guard clauses to fail fast and make code more readable
-- **Immutability**: Prefer immutable objects and readonly fields where possible
-- **Bounds Checking**: Validate array/collection indices and ranges
-- **State Validation**: Ensure objects are in valid states before operations
-- **Exception Safety**: Write exception-safe code that maintains object integrity
+Understanding Tiến Lên mechanics is essential for developing an effective AI engine:
 
-Example defensive coding pattern:
+| Concept            | Description                                                                   |
+| ------------------ | ----------------------------------------------------------------------------- |
+| **Card Rankings**  | 3 (lowest) → 4 → 5 → 6 → 7 → 8 → 9 → 10 → J → Q → K → A → 2 (highest)         |
+| **Suit Hierarchy** | ♠ Spades (lowest) → ♣ Clubs → ♦ Diamonds → ♥ Hearts (highest)                 |
+| **Hand Types**     | Singles, Pairs, Triples, Straights, Double Straights, Triple Straights, Bombs |
+| **Gameplay**       | Turn-based, must follow hand type, bombs beat everything except higher bombs  |
+| **Victory**        | First player to play all cards wins                                           |
+
+The AI system must understand these rules to make strategic decisions and evaluate game states effectively.
+
+---
+
+## 🎯 Core Development Rules
+
+### 1. .NET and C# Best Practices
+
+#### Naming Conventions
+- **PascalCase**: Classes, methods, properties (`Card`, `GetValidMoves()`, `PlayerHand`)
+- **camelCase**: Fields, local variables (`cardCount`, `isValid`)
+
+#### Code Organization
+- **One Type Per File**: Each class, enum, interface, or record in separate files
+- **SOLID Principles**: Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, Dependency Inversion
+- **Namespace Structure**: Follow `TienLenAi2.Core.{Domain}` pattern
+
+#### Modern C# Features
+- **Nullable Reference Types**: Enabled in this project - use appropriately
+- **Records**: For immutable data structures (cards, game states)
+- **Pattern Matching**: For game logic and card evaluation
+- **Async/Await**: For any asynchronous operations
+
+#### Resource Management
+- Use `using` statements for disposable resources
+- Implement `IDisposable` when managing unmanaged resources
+
+---
+
+### 2. Defensive Coding Techniques
+
+> **Principle**: Fail fast and maintain object integrity
+
+#### Input Validation
 ```csharp
 public void ProcessCards(IEnumerable<Card> cards)
 {
     ArgumentNullException.ThrowIfNull(cards);
     
     var cardList = cards.ToList();
-    if (cardList.Count == 0) {
+    if (cardList.Count == 0)
+    {
         throw new ArgumentException("Card collection cannot be empty", nameof(cards));
     }
     
@@ -40,82 +69,167 @@ public void ProcessCards(IEnumerable<Card> cards)
 }
 ```
 
-### 3. Comments Only When Necessary
+#### Key Practices
+- **Guard Clauses**: Validate inputs early and return/throw immediately
+- **Null Checks**: Perform null checks on arguments and return values
+- **Immutability**: Prefer immutable objects and `readonly` fields
+- **Bounds Checking**: Validate array/collection indices and ranges
+- **State Validation**: Ensure objects are in valid states before operations
+- **Exception Safety**: Write code that maintains integrity even when exceptions occur
 
-- **Self-Documenting Code**: Write code that explains itself through clear naming and structure
-- **When to Comment**: 
-  - Complex business logic or algorithms
-  - Non-obvious design decisions
-  - Public API documentation (XML comments)
-  - Workarounds or temporary solutions
-- **When NOT to Comment**:
-  - Obvious code that speaks for itself
-  - Redundant descriptions of what the code does
-  - Outdated or misleading comments
+---
 
-### 4. Confirm Before Writing Code
+### 3. Comments - Only When Necessary
 
-- **Approval Process**: Always confirm implementation approach before writing significant code changes
-- **Design Discussion**: Discuss architectural decisions and design patterns before implementation
-- **Breaking Changes**: Confirm any changes that might affect existing functionality
-- **New Dependencies**: Get approval before adding new NuGet packages or external dependencies
+#### When TO Comment
+- ✅ Complex game algorithms (e.g., hand evaluation logic)
+- ✅ Non-obvious design decisions
+- ✅ Public API documentation (XML comments)
+- ✅ Workarounds or temporary solutions
+- ✅ Game rule explanations for complex scenarios
 
-### 5. Prefer Concise Code Over Crafty Code
+#### When NOT to Comment
+- ❌ Obvious code that speaks for itself
+- ❌ Redundant descriptions of what code does
+- ❌ Outdated or misleading comments
 
-- **Readability First**: Write code that is easy to read and understand
-- **Simple Solutions**: Choose straightforward implementations over clever ones
-- **Clear Intent**: Make the code's purpose obvious to other developers
-- **Maintainability**: Prioritize code that is easy to modify and extend
-- **Avoid Over-Engineering**: Don't add complexity unless it's clearly needed
-- **Use Curly Braces**: Always use curly braces for code blocks, even for single statements
+**Goal**: Write self-documenting code through clear naming and structure.
 
-Examples of concise vs crafty code:
+---
 
-**Concise (Preferred):**
+### 4. Confirmation Process
+
+#### Before Writing Significant Code
+- **Approval Process**: Confirm implementation approach
+- **Design Discussion**: Discuss architectural decisions and design patterns
+- **Breaking Changes**: Confirm changes that affect existing functionality
+- **New Dependencies**: Get approval before adding NuGet packages
+
+#### What Qualifies as "Significant"
+- New classes or major refactoring
+- Changes to public APIs
+- New algorithms or game logic
+- Performance-critical code
+
+---
+
+### 5. Concise Over Crafty Code
+
+> **Principle**: Readability and maintainability over cleverness
+
+#### Preferred Style ✅
 ```csharp
 public bool IsValidCard(Card card)
 {
     return card != null && card.IsValid();
 }
 
-if (condition)
+if (hasValidMove)
 {
-    DoSomething();
+    PlayCard();
 }
 ```
 
-**Crafty (Avoid):**
+#### Avoid This Style ❌
 ```csharp
 public bool IsValidCard(Card card) => card?.IsValid() ?? false;
 
-if (condition) DoSomething(); // Missing braces
+if (hasValidMove) PlayCard(); // Missing braces
 ```
 
-## Project Structure
+#### Guidelines
+- **Readability First**: Code should be easy to read and understand
+- **Simple Solutions**: Choose straightforward implementations
+- **Clear Intent**: Make the code's purpose obvious
+- **Maintainability**: Prioritize code that's easy to modify and extend
+- **Avoid Over-Engineering**: Don't add complexity unless clearly needed
+- **Always Use Braces**: Even for single statements
 
-### TienLenAi2.Core ### 
+---
 
-Core game logic and domain models. Keep a focus on training an Ai model to play the game.
+## 🏗️ Project Structure
 
-- Keep business logic separate from infrastructure concerns
-- Use dependency injection for loose coupling
-- Follow clean architecture principles
-- Keep state immutable
+### TienLenAi2.Core
 
-## Code Quality
+**Purpose**: Core game logic and domain models for Tiến Lên card game
 
-- Write unit tests for business logic
-- Use meaningful variable and method names
-- Keep methods focused and small
-- Prefer composition over inheritance
-- Use interfaces to define contracts
+#### Focus Areas
+| Area                      | Description                                           |
+| ------------------------- | ----------------------------------------------------- |
+| **Game State Management** | Tracking players, hands, tricks, and game progression |
+| **Rule Validation**       | Ensuring moves comply with Tiến Lên rules             |
+| **Hand Evaluation**       | Determining valid plays and hand rankings             |
+| **AI Training Support**   | Providing game state representations for ML           |
 
-## Review Checklist
+#### Architecture Guidelines
+- **Separation of Concerns**: Business logic separate from infrastructure
+- **Dependency Injection**: Loose coupling between components
+- **Clean Architecture**: Domain-driven design principles
+- **Immutability**: Support AI training scenarios with immutable state
+- **Domain Modeling**: Game entities as immutable records where possible
 
-Before submitting code, ensure:
-- [ ] Code follows naming conventions
-- [ ] Input validation is implemented
-- [ ] No obvious security vulnerabilities
-- [ ] Code is self-documenting with minimal comments
+#### Suggested Structure
+```
+TienLenAi2.Core/
+├── Cards/          # Card related entities
+├── Hands/          # Hand, HandFactory, etc.
+├── States/         # GameState, TrickState, etc.
+├── Players/        # Player related entities
+├── Rules/          # Rule validation components
+├── Evaluators/     # Hand evaluation logic
+└── Interfaces/     # Contracts and abstractions
+```
+
+---
+
+## ✅ Code Quality Standards
+
+### Testing Requirements
+- **Unit Tests**: All business logic, especially game rule validation
+- **Edge Cases**: Test invalid game states and boundary conditions
+- **Game Scenarios**: Both valid and invalid game situations
+- **Coverage**: Aim for high coverage on game logic
+
+### Code Standards
+- **Meaningful Names**: Use game terminology in variable/method names
+- **Focused Methods**: Keep methods small and single-purpose
+- **Composition Over Inheritance**: Prefer composition for flexibility
+- **Interface Contracts**: Define clear contracts for game components
+- **Robust Error Handling**: Ensure AI training data integrity
+
+### Performance Considerations
+- **Immutable Collections**: Use when appropriate for game state
+- **Memory Efficiency**: Important for AI training scenarios
+- **Algorithmic Efficiency**: Hand evaluation should be fast
+
+---
+
+## 📋 Review Checklist
+
+Before submitting code, verify:
+
+#### Code Standards
+- [ ] Follows naming conventions (PascalCase/camelCase)
+- [ ] Input validation implemented with guard clauses
+- [ ] No security vulnerabilities
+- [ ] Self-documenting code with minimal comments
 - [ ] Implementation approach was confirmed
 - [ ] Code is concise and readable
+
+#### Game-Specific Requirements
+- [ ] Game rules correctly implemented (reference [`docs/game-rules.md`](docs/game-rules.md))
+- [ ] Edge cases and invalid states properly handled
+- [ ] Tests cover valid and invalid game scenarios
+- [ ] Game terminology used in naming
+- [ ] AI training considerations addressed
+
+#### Technical Requirements
+- [ ] Nullable reference types used appropriately
+- [ ] Immutability preferred where applicable
+- [ ] SOLID principles followed
+- [ ] Exception safety maintained
+- [ ] Performance implications considered
+
+---
+
+*This document is a living guide - update it as the project evolves.*

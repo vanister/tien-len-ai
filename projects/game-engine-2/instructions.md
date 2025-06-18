@@ -8,6 +8,7 @@ This document outlines the development guidelines and best practices for the Tie
 
 - **Naming Conventions**: Use PascalCase for classes, methods, and properties; camelCase for fields and local variables
 - **Code Organization**: Follow the standard .NET project structure and namespace conventions
+- **One Type Per File**: Each class, enum, interface, or record should be in its own separate file
 - **SOLID Principles**: Design classes following Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion principles
 - **Async/Await**: Use async/await patterns properly for asynchronous operations
 - **Nullable Reference Types**: Leverage C# nullable reference types (enabled in this project) to prevent null reference exceptions

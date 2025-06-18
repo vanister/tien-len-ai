@@ -27,6 +27,7 @@
 4. Add comments only where business logic requires explanation.
 5. Consider how the code will be tested.
 6. Review against SOLID principles before finalizing.
+7. Do not make example usage file unless requested to do so.
 
 **When Suggesting Solutions:**
 - Provide rationale for technology choices.

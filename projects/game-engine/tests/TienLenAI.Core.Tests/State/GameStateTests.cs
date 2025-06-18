@@ -288,5 +288,135 @@ public class GameStateTests
             Assert.AreEqual(0, count);
         }
     }
+
+    [TestMethod]
+    public void CreateNewGame_ShouldInitializeCorrectly()
+    {
+        // Act
+        var gameState = GameState.CreateNewGame();
+
+        // Assert
+        Assert.AreEqual(4, gameState.PlayerCount);
+        Assert.IsFalse(gameState.IsGameComplete);
+        Assert.AreEqual(1, gameState.TrickNumber);
+        Assert.AreEqual(0, gameState.FinishOrder.Count);
+    }
+
+    [TestMethod]
+    public void CreateNewGame_ShouldUseDefaultPlayerNames()
+    {
+        // Act
+        var gameState = GameState.CreateNewGame();
+
+        // Assert
+        Assert.AreEqual("Player 1", gameState.GetPlayer(0).Name);
+        Assert.AreEqual("Player 2", gameState.GetPlayer(1).Name);
+        Assert.AreEqual("Player 3", gameState.GetPlayer(2).Name);
+        Assert.AreEqual("Player 4", gameState.GetPlayer(3).Name);
+    }
+
+    [TestMethod]
+    public void CreateNewGame_WithCustomNames_ShouldUseProvidedNames()
+    {
+        // Arrange
+        var names = new[] { "Alice", "Bob", "Charlie", "Diana" };
+
+        // Act
+        var gameState = GameState.CreateNewGame(names);
+
+        // Assert
+        for (int i = 0; i < 4; i++)
+        {
+            Assert.AreEqual(names[i], gameState.GetPlayer(i).Name);
+        }
+    }
+
+    [TestMethod]
+    public void CreateNewGame_ShouldGiveEachPlayer13Cards()
+    {
+        // Act
+        var gameState = GameState.CreateNewGame();
+
+        // Assert
+        for (int i = 0; i < 4; i++)
+        {
+            Assert.AreEqual(13, gameState.GetPlayer(i).Hand.Count);
+        }
+    }
+
+    [TestMethod]
+    public void CreateNewGame_ShouldDistributeAll52Cards()
+    {
+        // Act
+        var gameState = GameState.CreateNewGame();
+
+        // Assert
+        var allCards = new List<Card>();
+        for (int i = 0; i < 4; i++)
+        {
+            allCards.AddRange(gameState.GetPlayer(i).Hand);
+        }
+
+        Assert.AreEqual(52, allCards.Count);
+        var uniqueCards = new HashSet<Card>(allCards);
+        Assert.AreEqual(52, uniqueCards.Count);
+    }
+
+    [TestMethod]
+    public void CreateNewGame_OnePlayerShouldHave3Spades()
+    {
+        // Act
+        var gameState = GameState.CreateNewGame();
+
+        // Assert
+        var threeOfSpades = new Card(CardRank.Three, CardSuit.Spades);
+        var playersWithThreeSpades = 0;
+        var playerWithThreeSpades = -1;
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (gameState.GetPlayer(i).Hand.Contains(threeOfSpades))
+            {
+                playersWithThreeSpades++;
+                playerWithThreeSpades = i;
+            }
+        }
+
+        Assert.AreEqual(1, playersWithThreeSpades, "Exactly one player should have 3♠");
+        Assert.AreEqual(playerWithThreeSpades, gameState.CurrentPlayerIndex,
+            "The player with 3♠ should be the current player");
+    }
+
+    [TestMethod]
+    public void CreateNewGame_WithSeed_ShouldBeReproducible()
+    {
+        // Arrange
+        const int seed = 42;
+        var names = new[] { "Alice", "Bob", "Charlie", "Diana" };
+
+        // Act
+        var game1 = GameState.CreateNewGame(seed, names);
+        var game2 = GameState.CreateNewGame(seed, names);
+
+        // Assert
+        Assert.AreEqual(game1.CurrentPlayerIndex, game2.CurrentPlayerIndex);
+
+        for (int i = 0; i < 4; i++)
+        {
+            CollectionAssert.AreEqual(game1.GetPlayer(i).Hand, game2.GetPlayer(i).Hand);
+            Assert.AreEqual(game1.GetPlayer(i).Name, game2.GetPlayer(i).Name);
+        }
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(ArgumentException))]
+    public void CreateNewGame_WithWrongNumberOfNames_ShouldThrow()
+    {
+        // Arrange
+        var names = new[] { "Alice", "Bob" }; // Only 2 names, need 4
+
+        // Act & Assert
+        GameState.CreateNewGame(names);
+    }
 }
 

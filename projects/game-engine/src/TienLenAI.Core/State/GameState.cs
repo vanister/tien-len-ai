@@ -448,4 +448,65 @@ public class GameState
 
         return updatedPlayers;
     }
+
+    /// <summary>
+    /// Creates a new Tien Len game with shuffled cards dealt to 4 players.
+    /// Each player receives 13 cards and the game is ready to start.
+    /// </summary>
+    /// <param name="playerNames">Names for the 4 players. If null, default names will be used.</param>
+    /// <param name="isFirstGame">Whether this is the first game in a series</param>
+    /// <returns>A new GameState ready to play</returns>
+    public static GameState CreateNewGame(string[]? playerNames = null, bool isFirstGame = true)
+    {
+        // Use default names if none provided
+        playerNames ??= ["Player 1", "Player 2", "Player 3", "Player 4"];
+
+        if (playerNames.Length != 4)
+        {
+            throw new ArgumentException("Must provide exactly 4 player names", nameof(playerNames));
+        }
+
+        // Deal cards using DeckFactory
+        var hands = DeckFactory.CreateTienLenGame();
+
+        // Create players with dealt cards
+        var players = new List<Player>();
+        for (int i = 0; i < 4; i++)
+        {
+            players.Add(new Player(playerNames[i], hands[i]));
+        }
+
+        return new GameState(players, isFirstGame);
+    }
+
+    /// <summary>
+    /// Creates a new Tien Len game with a seeded shuffle for reproducible results.
+    /// Useful for testing and debugging.
+    /// </summary>
+    /// <param name="seed">Seed for the random number generator</param>
+    /// <param name="playerNames">Names for the 4 players. If null, default names will be used.</param>
+    /// <param name="isFirstGame">Whether this is the first game in a series</param>
+    /// <returns>A new GameState ready to play</returns>
+    public static GameState CreateNewGame(int seed, string[]? playerNames = null, bool isFirstGame = true)
+    {
+        // Use default names if none provided
+        playerNames ??= ["Player 1", "Player 2", "Player 3", "Player 4"];
+
+        if (playerNames.Length != 4)
+        {
+            throw new ArgumentException("Must provide exactly 4 player names", nameof(playerNames));
+        }
+
+        // Deal cards using DeckFactory with seed
+        var hands = DeckFactory.CreateTienLenGame(seed);
+
+        // Create players with dealt cards
+        var players = new List<Player>();
+        for (int i = 0; i < 4; i++)
+        {
+            players.Add(new Player(playerNames[i], hands[i]));
+        }
+
+        return new GameState(players, isFirstGame);
+    }
 }

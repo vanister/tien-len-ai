@@ -113,7 +113,32 @@ public void ProcessCards(IEnumerable<Card> cards)
 
 ---
 
-### 5. Concise Over Crafty Code
+### 5. Approval Before Implementation
+
+> **Principle**: Always confirm implementation direction before writing code
+
+#### Requirement
+- **Pre-Implementation Summary**: Provide a clear summary of the planned implementation approach
+- **Wait for Approval**: Do not proceed with code writing until explicit approval
+- **Include**: Expected classes/methods, key algorithms, and rationale for approach
+- **Alternatives**: When relevant, outline alternative implementations considered
+
+#### Example Process
+1. Understand the requirement
+2. Formulate an implementation plan
+3. Present the plan in clear, concise terms
+4. Wait for approval
+5. Proceed with implementation after receiving explicit approval
+
+#### Benefits
+- Prevents unnecessary work on incorrect approaches
+- Ensures alignment with project vision
+- Reduces need for major refactoring
+- Improves overall code quality through collaborative design
+
+---
+
+### 6. Concise Over Crafty Code
 
 > **Principle**: Readability and maintainability over cleverness
 

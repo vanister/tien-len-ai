@@ -1,4 +1,4 @@
-namespace TienLenAi2.Core.States;
+namespace TienLenAi2.Core.States.Game;
 
 public enum GamePhase
 {

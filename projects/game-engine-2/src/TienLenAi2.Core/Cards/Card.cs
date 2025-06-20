@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace TienLenAi2.Core.Cards;
 
 public readonly struct Card : IComparable<Card>, IEquatable<Card>
@@ -77,4 +79,21 @@ public readonly struct Card : IComparable<Card>, IEquatable<Card>
     public static bool operator >=(Card left, Card right) => left.CompareTo(right) >= 0;
     public static bool operator ==(Card left, Card right) => left.Equals(right);
     public static bool operator !=(Card left, Card right) => !left.Equals(right);
+    
+    public static Card ThreeOfSpades => new Card(Rank.Three, Suit.Spades);
+    
+    public static ImmutableList<Card> CreateStandardDeck()
+    {
+        var cards = new List<Card>(52);
+        
+        foreach (Rank rank in Enum.GetValues<Rank>())
+        {
+            foreach (Suit suit in Enum.GetValues<Suit>())
+            {
+                cards.Add(new Card(rank, suit));
+            }
+        }
+        
+        return [.. cards];
+    }
 }

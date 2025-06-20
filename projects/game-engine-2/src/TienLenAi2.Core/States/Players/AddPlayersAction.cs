@@ -9,7 +9,7 @@ public record AddPlayersAction(
     ImmutableList<PlayerInfo> Players
 ) : IAction
 {
-    public static AddPlayersAction Create(int playerCount)
+    public static AddPlayersAction Add(int playerCount)
     {
         if (playerCount < 2 || playerCount > 4)
         {

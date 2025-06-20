@@ -4,6 +4,6 @@ namespace TienLenAi2.Core.States;
 
 public record RootState(
     GameState Game,
-    ImmutableDictionary<int, PlayerState> Players
+    PlayersState Players
 )
 { }

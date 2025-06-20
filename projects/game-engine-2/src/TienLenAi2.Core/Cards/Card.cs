@@ -50,16 +50,9 @@ public readonly struct Card : IComparable<Card>, IEquatable<Card>
 
     public int CompareTo(Card other)
     {
-        // We could just compare the Value, but keeping the two-step comparison 
-        // makes the logic clearer and follows game rules explicitly
-        int rankComparison = Rank.CompareTo(other.Rank);
-        if (rankComparison != 0)
-        {
-            return rankComparison;
-        }
-
-        // If ranks are equal, compare by suit
-        return Suit.CompareTo(other.Suit);
+        // Using Value for comparison is more efficient
+        // since it already encapsulates rank and suit ordering
+        return Value.CompareTo(other.Value);
     }
 
     public bool Equals(Card other)

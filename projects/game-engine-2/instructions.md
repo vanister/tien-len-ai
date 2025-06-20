@@ -6,23 +6,10 @@ This document outlines development guidelines and best practices for the TienLen
 
 ---
 
-## 📖 Game Context
+## Game Design and Rules
 
-**IMPORTANT**: Before contributing, familiarize yourself with the game rules in [`docs/game-rules.md`](docs/game-rules.md).
-
-Understanding Tiến Lên mechanics is essential for developing an effective AI engine:
-
-| Concept            | Description                                                                   |
-| ------------------ | ----------------------------------------------------------------------------- |
-| **Card Rankings**  | 3 (lowest) → 4 → 5 → 6 → 7 → 8 → 9 → 10 → J → Q → K → A → 2 (highest)         |
-| **Suit Hierarchy** | ♠ Spades (lowest) → ♣ Clubs → ♦ Diamonds → ♥ Hearts (highest)                 |
-| **Hand Types**     | Singles, Pairs, Triples, Straights, Double Straights, Triple Straights, Bombs |
-| **Gameplay**       | Turn-based, must follow hand type, bombs beat everything except higher bombs  |
-| **Victory**        | First player to play all cards wins                                           |
-
-The AI system must understand these rules to make strategic decisions and evaluate game states effectively.
-
----
+Familiarize yourself with the technical design of the game engine in [./docs/game-design.md](./docs/game-design.md).
+The game rules are in the [./docs/game-rules.md](./docs/game-rules.md).
 
 ## 🎯 Core Development Rules
 
@@ -84,14 +71,13 @@ public void ProcessCards(IEnumerable<Card> cards)
 #### When TO Comment
 - ✅ Complex game algorithms (e.g., hand evaluation logic)
 - ✅ Non-obvious design decisions
-- ✅ Public API documentation (XML comments)
 - ✅ Workarounds or temporary solutions
-- ✅ Game rule explanations for complex scenarios
 
 #### When NOT to Comment
 - ❌ Obvious code that speaks for itself
 - ❌ Redundant descriptions of what code does
 - ❌ Outdated or misleading comments
+- ❌ Don't comment unless I ask you to
 
 **Goal**: Write self-documenting code through clear naming and structure.
 

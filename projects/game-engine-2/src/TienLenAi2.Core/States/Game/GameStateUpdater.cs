@@ -1,5 +1,4 @@
-using TienLenAi2.Core.States;
-using TienLenAi2.Core.States.Actions;
+namespace TienLenAi2.Core.States.Game;
 
 public static class GameStateUpdater
 {

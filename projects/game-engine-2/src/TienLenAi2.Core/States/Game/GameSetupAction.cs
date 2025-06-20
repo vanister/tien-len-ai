@@ -1,7 +1,6 @@
-namespace TienLenAi2.Core.States.Actions
-{
-    public record GameSetupAction(
-        string Type
-    ) : IAction
-    { }
-}
+namespace TienLenAi2.Core.States.Game;
+
+public record GameSetupAction(
+    string Type
+) : IAction
+{ }

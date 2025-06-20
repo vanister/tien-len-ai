@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using TienLenAi2.Core.Hands;
 
-namespace TienLenAi2.Core.States;
+namespace TienLenAi2.Core.States.Game;
 
 public record GameState(
     int? CurrentPlayerId,

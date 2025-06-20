@@ -1,6 +1,4 @@
-using TienLenAi2.Core.States.Actions;
-
-namespace TienLenAi2.Core.States.Reducers;
+namespace TienLenAi2.Core.States.Game;
 
 public static class GameReducer
 {

@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using TienLenAi2.Core.States.Game;
 using TienLenAi2.Core.States.Players;
 
-
 namespace TienLenAi2.Core.States;
 
 public class Store
@@ -42,16 +41,5 @@ public class Store
         ArgumentNullException.ThrowIfNull(action);
 
         _currentState = RootReducer.Reduce(_currentState, action);
-    }
-
-    public void Dispatch(IThunk thunk)
-    {
-        ArgumentNullException.ThrowIfNull(thunk);
-
-        var actions = thunk.Execute(_currentState);
-        foreach (var action in actions)
-        {
-            Dispatch(action);
-        }
     }
 }

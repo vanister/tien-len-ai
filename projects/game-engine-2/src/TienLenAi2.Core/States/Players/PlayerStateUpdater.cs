@@ -9,7 +9,7 @@ public static class PlayerStateUpdater
     {
         ArgumentNullException.ThrowIfNull(action);
 
-        var playersDict = state.Players;
+        var playersDict = state.ByIds;
 
         foreach (var playerInfo in action.Players)
         {
@@ -17,13 +17,28 @@ public static class PlayerStateUpdater
             {
                 Id = playerInfo.Id,
                 Name = playerInfo.Name,
-                Cards = ImmutableList<Card>.Empty,
-                HasPassed = false
+                Cards = []
             };
 
             playersDict = playersDict.Add(playerInfo.Id, playerState);
         }
 
-        return state with { Players = playersDict };
+        return state with { ByIds = playersDict };
+    }
+
+    public static PlayersState UpdatePlayerCards(PlayersState state, UpdatePlayerCardsAction action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+
+        if (!state.ByIds.ContainsKey(action.PlayerId))
+        {
+            throw new ArgumentException($"Player with ID {action.PlayerId} does not exist", nameof(action));
+        }
+
+        var currentPlayer = state.ByIds[action.PlayerId];
+        var updatedPlayer = currentPlayer with { Cards = action.Cards };
+        var updatedPlayers = state.ByIds.SetItem(action.PlayerId, updatedPlayer);
+
+        return state with { ByIds = updatedPlayers };
     }
 }

@@ -6,4 +6,10 @@ public static class GameStateUpdater
     {
         return state;
     }
+
+    public static GameState UpdateGamePhase(GameState state, UpdateGamePhaseAction action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        return state with { Phase = action.Phase };
+    }
 }

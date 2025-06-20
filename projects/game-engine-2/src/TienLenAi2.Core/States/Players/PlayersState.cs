@@ -2,7 +2,11 @@ using System.Collections.Immutable;
 
 namespace TienLenAi2.Core.States.Players;
 
-public record PlayersState(ImmutableDictionary<int, PlayerState> Players)
+/// <summary>
+/// Represents the state of all players in the game.
+/// </summary>
+public record PlayersState(ImmutableDictionary<int, PlayerState> ByIds)
 {
-    public int NubmerOfPlayers => Players.Count;
+    public int TotalPlayers => ByIds.Count;
+    public IEnumerable<int> Ids => ByIds.Keys;
 }

@@ -43,4 +43,15 @@ public class Store
 
         _currentState = RootReducer.Reduce(_currentState, action);
     }
+
+    public void Dispatch(IThunk thunk)
+    {
+        ArgumentNullException.ThrowIfNull(thunk);
+
+        var actions = thunk.Execute(_currentState);
+        foreach (var action in actions)
+        {
+            Dispatch(action);
+        }
+    }
 }

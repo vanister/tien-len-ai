@@ -155,6 +155,7 @@ if (hasValidMove) PlayCard(); // Missing braces
 - **Maintainability**: Prioritize code that's easy to modify and extend
 - **Avoid Over-Engineering**: Don't add complexity unless clearly needed
 - **Always Use Braces**: Even for single statements
+- **Prefer LiNQ over loops**: unless loops make more sense or is clearer in intent
 
 ---
 

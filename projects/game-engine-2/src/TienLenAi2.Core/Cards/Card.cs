@@ -2,20 +2,40 @@ using System.Collections.Immutable;
 
 namespace TienLenAi2.Core.Cards;
 
-public readonly struct Card : IComparable<Card>, IEquatable<Card>
+public readonly struct Card(Rank rank, Suit suit) : IComparable<Card>, IEquatable<Card>
 {
-    public readonly Suit Suit { get; }
-    public readonly Rank Rank { get; }
+    public readonly Suit Suit { get; } = suit;
+    public readonly Rank Rank { get; } = rank;
 
     // Value combines rank and suit into a single unique value.
     // Each rank gets 4 positions (one for each suit).
     // This gives a unique value from 12-63 for each card in a standard deck.
     public readonly int Value => ((int)Rank * 4) + (int)Suit;
 
-    public Card(Rank rank, Suit suit)
+    // factory and helpers for creating a card from suit and rank
+    public static Card ThreeOfSpades => new(Rank.Three, Suit.Spades);
+    public static Card Of(Rank rank, Suit suit) => new(rank, suit);
+
+    public int CompareTo(Card other)
     {
-        Rank = rank;
-        Suit = suit;
+        // Using Value for comparison is more efficient
+        // since it already encapsulates rank and suit ordering
+        return Value.CompareTo(other.Value);
+    }
+
+    public bool Equals(Card other)
+    {
+        return Rank == other.Rank && Suit == other.Suit;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is Card card && Equals(card);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Rank, Suit);
     }
 
     public override string ToString()
@@ -50,28 +70,6 @@ public readonly struct Card : IComparable<Card>, IEquatable<Card>
         return $"{rankSymbol}{suitSymbol}";
     }
 
-    public int CompareTo(Card other)
-    {
-        // Using Value for comparison is more efficient
-        // since it already encapsulates rank and suit ordering
-        return Value.CompareTo(other.Value);
-    }
-
-    public bool Equals(Card other)
-    {
-        return Rank == other.Rank && Suit == other.Suit;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is Card card && Equals(card);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Rank, Suit);
-    }
-
     // Operator overloads for comparison
     public static bool operator <(Card left, Card right) => left.CompareTo(right) < 0;
     public static bool operator >(Card left, Card right) => left.CompareTo(right) > 0;
@@ -79,21 +77,4 @@ public readonly struct Card : IComparable<Card>, IEquatable<Card>
     public static bool operator >=(Card left, Card right) => left.CompareTo(right) >= 0;
     public static bool operator ==(Card left, Card right) => left.Equals(right);
     public static bool operator !=(Card left, Card right) => !left.Equals(right);
-    
-    public static Card ThreeOfSpades => new Card(Rank.Three, Suit.Spades);
-    
-    public static ImmutableList<Card> CreateStandardDeck()
-    {
-        var cards = new List<Card>(52);
-        
-        foreach (Rank rank in Enum.GetValues<Rank>())
-        {
-            foreach (Suit suit in Enum.GetValues<Suit>())
-            {
-                cards.Add(new Card(rank, suit));
-            }
-        }
-        
-        return [.. cards];
-    }
 }

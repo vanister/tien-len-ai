@@ -9,4 +9,10 @@ public record PlayersState(ImmutableDictionary<int, PlayerState> ByIds)
 {
     public int TotalPlayers => ByIds.Count;
     public IEnumerable<int> Ids => ByIds.Keys;
+
+    public static PlayersState CreateDefault()
+    {
+        return new PlayersState(ImmutableDictionary<int, PlayerState>.Empty);
+    }
+
 }

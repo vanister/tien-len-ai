@@ -13,14 +13,9 @@ public static class PlayerStateUpdater
 
         foreach (var playerInfo in action.Players)
         {
-            var playerState = new PlayerState
-            {
-                Id = playerInfo.Id,
-                Name = playerInfo.Name,
-                Cards = []
-            };
+            var player = PlayerState.WithIdAndName(playerInfo.Id, playerInfo.Name);
 
-            playersDict = playersDict.Add(playerInfo.Id, playerState);
+            playersDict = playersDict.Add(playerInfo.Id, player);
         }
 
         return state with { ByIds = playersDict };

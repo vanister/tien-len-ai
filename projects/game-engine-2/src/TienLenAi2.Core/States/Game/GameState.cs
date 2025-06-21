@@ -9,14 +9,21 @@ public record GameState(
     GamePhase Phase,
     ImmutableList<Hand> PlayedHands,
     Hand? CurrentHand,
-    ImmutableList<IAction> History
+    int? WinnerId,
+    int GameNumber
 )
 {
-    public override string ToString()
+    // todo - add a static method to create a default game state
+    public static GameState CreateDefault()
     {
-        return $"GameState(TrickNumber: {TrickNumber}, Phase: {Phase}, " +
-               $"CurrentPlayerId: {CurrentPlayerId}, " +
-               $"PlayedHandsCount: {PlayedHands.Count}, " +
-               $"CurrentHand: {(CurrentHand != null ? CurrentHand.ToString() : "None")})";
+        return new GameState(
+            CurrentPlayerId: null,
+            TrickNumber: 0,
+            Phase: GamePhase.NotStarted,
+            PlayedHands: [],
+            CurrentHand: null,
+            WinnerId: null,
+            GameNumber: 0
+        );
     }
 };

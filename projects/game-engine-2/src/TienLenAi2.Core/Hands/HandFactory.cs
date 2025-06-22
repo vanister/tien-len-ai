@@ -41,9 +41,7 @@ public static class HandFactory
 
         hand = new Hand(
             HandType.Single,
-            [highestCard],
-            (int)highestCard.Rank,
-            highestCard
+            [highestCard]
         );
 
         return true;

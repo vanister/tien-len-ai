@@ -7,9 +7,11 @@ public readonly struct Card(Rank rank, Suit suit) : IComparable<Card>, IEquatabl
     public readonly Suit Suit { get; } = suit;
     public readonly Rank Rank { get; } = rank;
 
-    // Value combines rank and suit into a single unique value.
-    // Each rank gets 4 positions (one for each suit).
-    // This gives a unique value from 12-63 for each card in a standard deck.
+    /// <summary>
+    /// Value combines rank and suit into a single unique value. 
+    /// Each rank gets 4 positions (one for each suit).<br/>
+    /// This gives a unique value from 12-63 for each card in a standard deck.
+    /// </summary>
     public readonly int Value => ((int)Rank * 4) + (int)Suit;
 
     // factory and helpers for creating a card from suit and rank

@@ -6,7 +6,7 @@ namespace TienLenAi2.Core.States;
 public static class RootReducer
 {
     /// <summary>
-    /// Reduces the current state based on the action provided and adds a history entry entry.
+    /// Reduces the current state based on the action provided and adds a history entry.
     /// </summary>
     public static RootState Reduce(RootState state, IAction action)
     {

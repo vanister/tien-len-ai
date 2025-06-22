@@ -12,9 +12,3 @@ public static class GameReducer
         };
     }
 }
-
-public static class GameActionTypes
-{
-    public const string SetupGame = "Game/SetupGame";
-    public const string UpdateGamePhase = "Game/UpdateGamePhase";
-}

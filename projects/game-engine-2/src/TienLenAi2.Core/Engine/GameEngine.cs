@@ -80,7 +80,7 @@ public class GameEngine
         }
     }
 
-    public void StartGame()
+    public void SetupGame()
     {
         // check if the game is already started
         if (CurrentState.Game.Phase > GamePhase.Setup)
@@ -93,13 +93,15 @@ public class GameEngine
         {
             throw new InvalidOperationException("Cannot start game when no players exist");
         }
+        
+        // todo -  check that we have a deck and players have cards
 
-        // dispatch setup game action 
-        var setupAction = new GameSetupAction(GameActionTypes.SetupGame);
+        var startingPlayerId = PlayerSelectors.FindPlayerWith3OfSpades(CurrentState)
+            ?? throw new InvalidOperationException("Cannot setup game without a player having 3 of Spades");
+
+        var setupAction = new SetupGameAction(GameActionTypes.SetupGame, startingPlayerId);
+
         _store.Dispatch(setupAction);
-
-        // 1. Update game phase to Starting
-        UpdateGamePhase(GamePhase.Starting);
     }
 
     private void UpdateGamePhase(GamePhase phase)

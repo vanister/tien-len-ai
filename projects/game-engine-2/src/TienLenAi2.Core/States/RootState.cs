@@ -16,6 +16,7 @@ public record RootState(
     PlayersState Players,
     IImmutableList<HistoryState> History,
     long ActionSequenceNumber = 0
+    // add stats like total rounds, who which round, etc. if needed
 )
 {
     public static RootState CreateDefault()

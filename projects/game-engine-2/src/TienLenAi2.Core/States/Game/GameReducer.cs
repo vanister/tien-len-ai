@@ -7,6 +7,7 @@ public static class GameReducer
         return action.Type switch
         {
             GameActionTypes.SetupGame => GameStateUpdater.SetupGame(currentState, (GameSetupAction)action),
+            GameActionTypes.StartGame => GameStateUpdater.StartGame(currentState, (StartGameAction)action),
             GameActionTypes.UpdateGamePhase => GameStateUpdater.UpdateGamePhase(currentState, (UpdateGamePhaseAction)action),
             _ => currentState
         };

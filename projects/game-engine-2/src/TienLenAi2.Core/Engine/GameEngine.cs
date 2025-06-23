@@ -55,15 +55,16 @@ public class GameEngine
         }
 
         // 1. Update game phase to Dealing
-       UpdateGamePhase(GamePhase.Dealing);
+        UpdateGamePhase(GamePhase.Dealing);
 
         // 2. Deal cards to each player
         var playerCardActions = deck
             .Take(playerIds.Count * cardsToDeal)
-            .Select((card, index) => new { 
-                Card = card, 
+            .Select((card, index) => new
+            {
+                Card = card,
                 // Assign card to player in round-robin fashion
-                PlayerId = playerIds[index % playerIds.Count] 
+                PlayerId = playerIds[index % playerIds.Count]
             })
             .GroupBy(x => x.PlayerId)
             .Select(group => new UpdatePlayerCardsAction(
@@ -79,7 +80,29 @@ public class GameEngine
         }
     }
 
-    public void UpdateGamePhase(GamePhase phase)
+    public void StartGame()
+    {
+        // check if the game is already started
+        if (CurrentState.Game.Phase > GamePhase.Setup)
+        {
+            throw new InvalidOperationException("Game has already started");
+        }
+
+        // Validate we have players
+        if (CurrentState.Players.TotalPlayers == 0)
+        {
+            throw new InvalidOperationException("Cannot start game when no players exist");
+        }
+
+        // dispatch setup game action 
+        var setupAction = new GameSetupAction(GameActionTypes.SetupGame);
+        _store.Dispatch(setupAction);
+
+        // 1. Update game phase to Starting
+        UpdateGamePhase(GamePhase.Starting);
+    }
+
+    private void UpdateGamePhase(GamePhase phase)
     {
         _store.Dispatch(new UpdateGamePhaseAction(GameActionTypes.UpdateGamePhase, phase));
     }

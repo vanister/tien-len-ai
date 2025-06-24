@@ -22,6 +22,10 @@ public class GameEngine
 
     public void AddPlayers(int playerCount = 4)
     {
+        if (CurrentState.Game.Phase > GamePhase.AddPlayer)
+        {
+            throw new InvalidOperationException("Cannot add players after the game has started");
+        }
         // Validate player count
         if (playerCount < 2 || playerCount > 4)
         {
@@ -36,10 +40,17 @@ public class GameEngine
 
         var action = AddPlayersAction.Add(playerCount);
         _store.Dispatch(action);
+
+        UpdateGamePhase(GamePhase.Dealing);
     }
 
     public void DealCards(int cardsToDeal = 13, ImmutableList<Card>? shuffledDeck = null, int seed = 0)
     {
+        if (CurrentState.Game.Phase > GamePhase.Dealing)
+        {
+            throw new InvalidOperationException("Cannot deal cards after the game has started");
+        }
+
         // Validate we have players
         if (CurrentState.Players.TotalPlayers == 0)
         {
@@ -54,9 +65,6 @@ public class GameEngine
         {
             throw new ArgumentException($"Not enough cards in deck. Need {totalCardsNeeded}, but deck has {deck.Count}");
         }
-
-        // 1. Update game phase to Dealing
-        UpdateGamePhase(GamePhase.Dealing);
 
         // 2. Deal cards to each player
         var playerCardActions = deck
@@ -79,12 +87,14 @@ public class GameEngine
         {
             _store.Dispatch(action);
         }
+
+        UpdateGamePhase(GamePhase.Starting);
     }
 
-    public void SetupGame()
+    public void StartGame()
     {
         // check if the game is already started
-        if (CurrentState.Game.Phase > GamePhase.Setup)
+        if (CurrentState.Game.Phase > GamePhase.Starting)
         {
             throw new InvalidOperationException("Game has already started");
         }
@@ -95,14 +105,14 @@ public class GameEngine
             throw new InvalidOperationException("Cannot start game when no players exist");
         }
 
-        // todo -  check that we have a deck and players have cards
+        // todo -  check that all players have cards
 
         var startingPlayerId = PlayerSelectors.FindPlayerWith3OfSpades(CurrentState)
             ?? throw new InvalidOperationException("Cannot setup game without a player having 3 of Spades");
 
-        var setupAction = new SetupGameAction(GameActionTypes.SetupGame, startingPlayerId);
+        var startAction = new StartGameAction(GameActionTypes.StartGame, startingPlayerId);
 
-        _store.Dispatch(setupAction);
+        _store.Dispatch(startAction);
     }
 
     public bool PlayHand(int playerId, IEnumerable<Card> cards, HandType handType)
@@ -153,8 +163,7 @@ public class GameEngine
 
         return true;
     }
-
-    private void UpdateGamePhase(GamePhase phase)
+    public void UpdateGamePhase(GamePhase phase)
     {
         _store.Dispatch(new UpdateGamePhaseAction(GameActionTypes.UpdateGamePhase, phase));
     }

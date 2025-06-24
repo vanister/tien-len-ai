@@ -1,6 +1,6 @@
 namespace TienLenAi2.Core.States.Game;
 
-public enum GamePhase: int
+public enum GamePhase: byte
 {
     NotStarted = 0,
     Setup = 1,

@@ -1,6 +1,6 @@
 namespace TienLenAi2.Core.Cards;
 
-public enum Rank : int
+public enum Rank : byte
 {
     Three = 3,
     Four = 4,

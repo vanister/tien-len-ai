@@ -1,6 +1,6 @@
 namespace TienLenAi2.Core.Cards;
 
-public enum Suit : int
+public enum Suit : byte
 {
     Spades = 0,
     Clubs = 1,

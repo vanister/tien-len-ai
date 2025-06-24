@@ -14,4 +14,11 @@ public static class PlayerSelectors
 
         return playerWithThreeOfSpades;
     }
+
+    public static PlayerState? FindPlayerById(RootState state, int playerId)
+    {
+        var player = state.Players.ByIds.GetValueOrDefault(playerId);
+
+        return player;
+    }   
 }

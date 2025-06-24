@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using TienLenAi2.Core.Cards;
 using TienLenAi2.Core.Decks;
+using TienLenAi2.Core.Hands;
 using TienLenAi2.Core.States;
 using TienLenAi2.Core.States.Game;
 using TienLenAi2.Core.States.Players;
@@ -62,9 +63,9 @@ public class GameEngine
             .Take(playerIds.Count * cardsToDeal)
             .Select((card, index) => new
             {
-                Card = card,
                 // Assign card to player in round-robin fashion
-                PlayerId = playerIds[index % playerIds.Count]
+                PlayerId = playerIds[index % playerIds.Count],
+                Card = card
             })
             .GroupBy(x => x.PlayerId)
             .Select(group => new UpdatePlayerCardsAction(
@@ -93,7 +94,7 @@ public class GameEngine
         {
             throw new InvalidOperationException("Cannot start game when no players exist");
         }
-        
+
         // todo -  check that we have a deck and players have cards
 
         var startingPlayerId = PlayerSelectors.FindPlayerWith3OfSpades(CurrentState)
@@ -102,6 +103,55 @@ public class GameEngine
         var setupAction = new SetupGameAction(GameActionTypes.SetupGame, startingPlayerId);
 
         _store.Dispatch(setupAction);
+    }
+
+    public bool PlayHand(int playerId, IEnumerable<Card> cards, HandType handType)
+    {
+        if (CurrentState.Game.CurrentPlayerId != playerId)
+        {
+            throw new InvalidOperationException($"It's not player {playerId}'s turn");
+        }
+
+        if (CurrentState.Game.Phase != GamePhase.Playing)
+        {
+            throw new InvalidOperationException($"Cannot play hand when not in 'Playing' phase. Current phase: ${CurrentState.Game.Phase}");
+        }
+
+        var player = PlayerSelectors.FindPlayerById(CurrentState, playerId)
+            ?? throw new ArgumentException($"Player with ID {playerId} does not exist", nameof(playerId));
+
+        if (!cards.All(player.Cards.Contains))
+        {
+            var missingCards = cards.Except(player.Cards);
+            throw new ArgumentException($"Player does not have all the cards in the provided hand. Missing ${string.Join(", ", missingCards)}", nameof(cards));
+        }
+
+        HandFactory.TryCreateHand(cards, handType, out var validHand);
+
+        if (validHand == null)
+        {
+            throw new ArgumentException("Invalid hand. Cannot create hand from provided cards.", nameof(cards));
+        }
+
+        // dispatch the action to play the hand on the game state
+        var gameAction = new PlayHandAction(
+            GameActionTypes.PlayHand,
+            playerId,
+            validHand
+        );
+
+        _store.Dispatch(gameAction);
+
+        // dispatch an action to remove the cards from the player's dealt hand
+        var playerAction = new RemovePlayerCardsAction(
+            PlayerActionTypes.RemovePlayerCards,
+            playerId,
+            validHand.Cards
+        );
+
+        _store.Dispatch(playerAction);
+
+        return true;
     }
 
     private void UpdateGamePhase(GamePhase phase)

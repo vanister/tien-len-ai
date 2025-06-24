@@ -8,6 +8,7 @@ public static class PlayerActionTypes
 {
     public const string AddPlayers = "Players/AddPlayers";
     public const string UpdatePlayerCards = "Players/UpdatePlayerCards";
+    public const string RemovePlayerCards = "Players/RemovePlayerCards";
 }
 
 #endregion
@@ -25,6 +26,7 @@ public record AddPlayersAction(string Type, ImmutableList<PlayerInfo> Players) :
 }
 
 public record UpdatePlayerCardsAction(string Type, int PlayerId, ImmutableList<Card> Cards) : IAction;
+public record RemovePlayerCardsAction(string Type, int PlayerId, ImmutableList<Card> Cards) : IAction;  
 
 #endregion
 

@@ -39,9 +39,8 @@ public class GameEngine
         }
 
         var action = AddPlayersAction.Add(playerCount);
-        _store.Dispatch(action);
 
-        UpdateGamePhase(GamePhase.Dealing);
+        _store.Dispatch(action);
     }
 
     public void DealCards(int cardsToDeal = 13, ImmutableList<Card>? shuffledDeck = null, int seed = 0)
@@ -75,7 +74,7 @@ public class GameEngine
                 PlayerId = playerIds[index % playerIds.Count],
                 Card = card
             })
-            .GroupBy(x => x.PlayerId)
+            .GroupBy(p => p.PlayerId)
             .Select(group => new UpdatePlayerCardsAction(
                 PlayerActionTypes.UpdatePlayerCards,
                 group.Key,
@@ -87,8 +86,6 @@ public class GameEngine
         {
             _store.Dispatch(action);
         }
-
-        UpdateGamePhase(GamePhase.Starting);
     }
 
     public void StartGame()
@@ -124,16 +121,20 @@ public class GameEngine
 
         if (CurrentState.Game.Phase != GamePhase.Playing)
         {
-            throw new InvalidOperationException($"Cannot play hand when not in 'Playing' phase. Current phase: ${CurrentState.Game.Phase}");
+            throw new InvalidOperationException($"Cannot play hand when not in 'Playing' phase. Current phase: {CurrentState.Game.Phase}");
         }
 
-        var player = PlayerSelectors.FindPlayerById(CurrentState, playerId)
-            ?? throw new ArgumentException($"Player with ID {playerId} does not exist", nameof(playerId));
+        var player = PlayerSelectors.FindPlayerById(CurrentState, playerId);
+
+        if (player == null)
+        {
+            throw new ArgumentException($"Player with ID {playerId} does not exist", nameof(playerId));
+        }
 
         if (!cards.All(player.Cards.Contains))
         {
             var missingCards = cards.Except(player.Cards);
-            throw new ArgumentException($"Player does not have all the cards in the provided hand. Missing ${string.Join(", ", missingCards)}", nameof(cards));
+            throw new ArgumentException($"Player does not have all the cards in the provided hand. Missing {string.Join(", ", missingCards)}", nameof(cards));
         }
 
         HandFactory.TryCreateHand(cards, handType, out var validHand);
@@ -141,6 +142,13 @@ public class GameEngine
         if (validHand == null)
         {
             throw new ArgumentException("Invalid hand. Cannot create hand from provided cards.", nameof(cards));
+        }
+
+        var IsFirstGame = GameSelectors.IsFirstGame(CurrentState);
+
+        if (IsFirstGame && !validHand.ContainsThreeOfSpades)
+        {
+            throw new InvalidOperationException("In the first game, the hand must contain the 3 of Spades");
         }
 
         // dispatch the action to play the hand on the game state
@@ -163,8 +171,49 @@ public class GameEngine
 
         return true;
     }
+
+    public void Pass(int playerId)
+    {
+        if (CurrentState.Game.CurrentPlayerId != playerId)
+        {
+            throw new InvalidOperationException($"It's not player {playerId}'s turn");
+        }
+
+        if (CurrentState.Game.Phase != GamePhase.Playing)
+        {
+            throw new InvalidOperationException($"Cannot pass when not in 'Playing' phase. Current phase: {CurrentState.Game.Phase}");
+        }
+
+        var action = new PassAction(GameActionTypes.Pass, playerId);
+
+        _store.Dispatch(action);
+    }
+
+    public (int Id, string PlayerName)? CheckForWinner()
+    {
+        PlayerSelectors.TryFindWinner(CurrentState, out var winningPlayer);
+
+        if (winningPlayer == null)
+        {
+            return null; // No winner found
+        }
+
+        var winnerAction = new UpdateWinnerAction(GameActionTypes.UpdateWinner, winningPlayer.Id);
+
+        _store.Dispatch(winnerAction);
+
+        return (winningPlayer.Id, winningPlayer.Name);
+    }
+
     public void UpdateGamePhase(GamePhase phase)
     {
         _store.Dispatch(new UpdateGamePhaseAction(GameActionTypes.UpdateGamePhase, phase));
+    }
+
+    public void NextTurn()
+    {
+        var action = new NextTurnAction(GameActionTypes.NextTurn);
+
+        _store.Dispatch(action);
     }
 }

@@ -21,4 +21,26 @@ public static class PlayerSelectors
 
         return player;
     }   
+    
+    public static bool TryFindWinner(RootState state, out PlayerState? winner)
+    {
+        var players = state.Players.ByIds.Values;
+
+        // Check if any player has no cards left
+        winner = players.FirstOrDefault(p => p.Cards.Count == 0);
+
+        return winner != null;
+    }   
+
+    public static bool IsWinner(RootState state, int playerId)
+    {
+        var player = FindPlayerById(state, playerId);
+
+        if (player == null)
+        {
+            return false; // Player does not exist
+        }
+
+        return player.Cards.Count == 0;
+    }
 }

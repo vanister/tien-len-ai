@@ -9,5 +9,5 @@ public enum GamePhase: byte
     Playing = 4,
     TrickStart = 5,
     TrickComplete = 6,
-    GameComplete = 7
+    GameCompleted = 7
 }

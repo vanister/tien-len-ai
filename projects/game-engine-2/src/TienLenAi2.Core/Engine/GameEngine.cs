@@ -124,12 +124,8 @@ public class GameEngine
             throw new InvalidOperationException($"Cannot play hand when not in 'Playing' phase. Current phase: {CurrentState.Game.Phase}");
         }
 
-        var player = PlayerSelectors.FindPlayerById(CurrentState, playerId);
-
-        if (player == null)
-        {
-            throw new ArgumentException($"Player with ID {playerId} does not exist", nameof(playerId));
-        }
+        var player = PlayerSelectors.FindPlayerById(CurrentState, playerId)
+            ?? throw new ArgumentException($"Player with ID {playerId} does not exist", nameof(playerId));
 
         if (!cards.All(player.Cards.Contains))
         {
@@ -149,6 +145,12 @@ public class GameEngine
         if (IsFirstGame && !validHand.ContainsThreeOfSpades)
         {
             throw new InvalidOperationException("In the first game, the hand must contain the 3 of Spades");
+        }
+
+        // make sure hand can beat the current hand on the table
+        if (CurrentState.Game.CurrentHand != null && !validHand.CanBeat(CurrentState.Game.CurrentHand))
+        {
+            throw new InvalidOperationException("The hand played cannot beat the current hand on the table");
         }
 
         // dispatch the action to play the hand on the game state
@@ -215,5 +217,16 @@ public class GameEngine
         var action = new NextTurnAction(GameActionTypes.NextTurn);
 
         _store.Dispatch(action);
+    }
+
+    public void NewGame(int? winningPlayerId = null)
+    {
+        if (CurrentState.Game.Phase == GamePhase.NotStarted)
+        {
+            throw new InvalidOperationException("Cannot start a new game when the current game has not started");
+        }
+
+        // Reset the game state to default
+        _store.Dispatch(new NewGameAction(GameActionTypes.NewGame, winningPlayerId));
     }
 }

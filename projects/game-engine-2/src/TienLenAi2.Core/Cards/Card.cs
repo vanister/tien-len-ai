@@ -11,8 +11,7 @@ public readonly struct Card(Rank rank, Suit suit) : IComparable<Card>, IEquatabl
     /// This gives a unique value from 12-63 for each card in a standard deck.
     /// </summary>
     public readonly int Value => ((int)Rank * 4) + (int)Suit;
-
-    // factory and helpers for creating a card from suit and rank
+    
     public static Card ThreeOfSpades => new(Rank.Three, Suit.Spades);
     public static Card Of(Rank rank, Suit suit) => new(rank, suit);
 

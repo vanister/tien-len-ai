@@ -4,25 +4,26 @@ using TienLenAi2.Core.Hands;
 namespace TienLenAi2.Core.States.Game;
 
 public record GameState(
-    int? CurrentPlayerId,
+    int GameNumber,
     int TrickNumber,
     GamePhase Phase,
     ImmutableList<Hand> PlayedHands,
+    int? CurrentPlayerId,
+    HandType? TrickType,
     Hand? CurrentHand,
-    int? WinnerId,
-    int GameNumber
+    int? WinningPlayerId
 )
 {
-    // todo - add a static method to create a default game state
     public static GameState CreateDefault()
     {
         return new GameState(
             CurrentPlayerId: null,
             TrickNumber: 0,
+            TrickType: null,
             Phase: GamePhase.NotStarted,
             PlayedHands: [],
             CurrentHand: null,
-            WinnerId: null,
+            WinningPlayerId: null,
             GameNumber: 0
         );
     }

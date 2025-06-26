@@ -21,7 +21,7 @@ public static class PlayerStateUpdater
         return state with { ByIds = playersDict };
     }
 
-    public static PlayersState UpdatePlayerCards(PlayersState state, RemovePlayerCardsAction action)
+    public static PlayersState UpdatePlayerCards(PlayersState state, UpdatePlayerCardsAction action)
     {
         ArgumentNullException.ThrowIfNull(action);
 

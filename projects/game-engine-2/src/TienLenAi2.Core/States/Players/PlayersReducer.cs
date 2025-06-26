@@ -9,7 +9,7 @@ public static class PlayersReducer
         return action.Type switch
         {
             PlayerActionTypes.AddPlayers => PlayerStateUpdater.AddPlayers(state, (AddPlayersAction)action),
-            PlayerActionTypes.UpdatePlayerCards => PlayerStateUpdater.UpdatePlayerCards(state, (RemovePlayerCardsAction)action),
+            PlayerActionTypes.UpdatePlayerCards => PlayerStateUpdater.UpdatePlayerCards(state, (UpdatePlayerCardsAction)action),
             _ => state
         };
     }

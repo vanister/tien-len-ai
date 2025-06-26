@@ -1,10 +1,8 @@
-using System.Collections.Immutable;
+using TienLenAi2.Core.Tests.Helpers;
 using TienLenAi2.Core.Cards;
 using TienLenAi2.Core.Engine;
-using TienLenAi2.Core.Hands;
 using TienLenAi2.Core.States;
 using TienLenAi2.Core.States.Players;
-using TienLenAi2.Core.States.Game;
 
 namespace TienLenAi2.Core.Tests.Integrations;
 
@@ -40,10 +38,10 @@ public class GameEngineSetupTests
     public void DealCards_FourPlayers_DistributesFullDeck()
     {
         // Arrange - Create store with 4 players already added and in Dealing phase
-        var initialState = CreateStateWithPlayers();
+        var initialState = GameEngineTestHelpers.CreateStateWithPlayers();
         var store = new Store(initialState);
         var engine = new GameEngine(store);
-        var testDeck = CreateTestDeck();
+        var testDeck = GameEngineTestHelpers.CreateTestDeck();
 
         // Act
         engine.DealCards(13, testDeck);
@@ -74,33 +72,5 @@ public class GameEngineSetupTests
         // Verify Player 1 gets cards at positions 0, 4, 8, 12, ... (round-robin pattern)
         var player1ExpectedCards = testDeck.Where((_, index) => index % 4 == 0).ToList();
         CollectionAssert.AreEquivalent(player1ExpectedCards, player1.Cards.ToList());
-    }
-
-    private static ImmutableList<Card> CreateTestDeck()
-    {
-        // Create all cards in deterministic order (3♠ will be first naturally)
-        var deck = new[] { Suit.Spades, Suit.Clubs, Suit.Diamonds, Suit.Hearts }
-            .SelectMany(suit => Enum.GetValues<Rank>().Select(rank => new Card(rank, suit)));
-
-        return [.. deck];
-    }
-
-    private static RootState CreateStateWithPlayers(int playerCount = 4)
-    {
-        // Create players state with 4 players
-        var playersDict = Enumerable.Range(1, playerCount)
-            .ToImmutableDictionary(
-                i => i,
-                i => new PlayerState(i, $"Player {i}", []));
-
-        var playersState = new PlayersState(playersDict);
-
-        // Create game state in Dealing phase
-        var gameState = GameState.CreateDefault() with
-        {
-            Phase = GamePhase.Dealing
-        };
-
-        return new RootState(gameState, playersState, History: [], ActionSequenceNumber: 0);
     }
 }

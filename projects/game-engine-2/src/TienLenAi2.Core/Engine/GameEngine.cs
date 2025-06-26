@@ -20,6 +20,8 @@ public class GameEngine
 
     public RootState CurrentState => _store.CurrentState;
 
+    #region Game Commands
+
     public void AddPlayers(int playerCount = 4)
     {
         if (CurrentState.Game.Phase > GamePhase.AddPlayer)
@@ -112,7 +114,7 @@ public class GameEngine
         _store.Dispatch(startAction);
     }
 
-    public bool PlayHand(int playerId, IEnumerable<Card> cards, HandType handType)
+    public void PlayHand(int playerId, IEnumerable<Card> cards, HandType handType)
     {
         if (CurrentState.Game.CurrentPlayerId != playerId)
         {
@@ -154,24 +156,14 @@ public class GameEngine
         }
 
         // dispatch the action to play the hand on the game state
-        var gameAction = new PlayHandAction(
-            GameActionTypes.PlayHand,
-            playerId,
-            validHand
-        );
+        var gameAction = new PlayHandAction(GameActionTypes.PlayHand, playerId, validHand);
 
         _store.Dispatch(gameAction);
 
         // dispatch an action to remove the cards from the player's dealt hand
-        var playerAction = new RemovePlayerCardsAction(
-            PlayerActionTypes.RemovePlayerCards,
-            playerId,
-            validHand.Cards
-        );
+        var playerAction = new RemovePlayerCardsAction(PlayerActionTypes.RemovePlayerCards, playerId, validHand.Cards);
 
         _store.Dispatch(playerAction);
-
-        return true;
     }
 
     public void Pass(int playerId)
@@ -189,22 +181,6 @@ public class GameEngine
         var action = new PassAction(GameActionTypes.Pass, playerId);
 
         _store.Dispatch(action);
-    }
-
-    public (int Id, string PlayerName)? CheckForWinner()
-    {
-        PlayerSelectors.TryFindWinner(CurrentState, out var winningPlayer);
-
-        if (winningPlayer == null)
-        {
-            return null; // No winner found
-        }
-
-        var winnerAction = new UpdateWinnerAction(GameActionTypes.UpdateWinner, winningPlayer.Id);
-
-        _store.Dispatch(winnerAction);
-
-        return (winningPlayer.Id, winningPlayer.Name);
     }
 
     public void UpdateGamePhase(GamePhase phase)
@@ -229,4 +205,26 @@ public class GameEngine
         // Reset the game state to default
         _store.Dispatch(new NewGameAction(GameActionTypes.NewGame, winningPlayerId));
     }
+
+    #endregion
+
+    #region Game Queries
+
+    public (int Id, string PlayerName)? CheckForWinner()
+    {
+        PlayerSelectors.TryFindWinner(CurrentState, out var winningPlayer);
+
+        if (winningPlayer == null)
+        {
+            return null; // No winner found
+        }
+
+        var winnerAction = new UpdateWinnerAction(GameActionTypes.UpdateWinner, winningPlayer.Id);
+
+        _store.Dispatch(winnerAction);
+
+        return (winningPlayer.Id, winningPlayer.Name);
+    }
+
+    #endregion
 }

@@ -9,8 +9,6 @@ public static class GameStateUpdater
         return state with
         {
             CurrentPlayerId = action.StartingPlayerId,
-            // transition to the next phase of the game
-            Phase = action.Phase,
         };
     }
 

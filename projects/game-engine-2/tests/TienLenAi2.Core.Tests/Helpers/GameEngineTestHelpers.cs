@@ -17,15 +17,11 @@ public static class GameEngineTestHelpers
         return [.. deck];
     }
 
-    public static RootState CreateStateWithPlayers(int playerCount = 4)
+    public static RootState CreateStateReadyForDealing()
     {
         // Create players state with 4 players
-        var playersDict = Enumerable.Range(1, playerCount)
-            .ToImmutableDictionary(
-                i => i,
-                i => new PlayerState(i, $"Player {i}", []));
-
-        var playersState = new PlayersState(playersDict);
+        var players = CreatePlayers();
+        var playersState = new PlayersState(players);
 
         // Create game state in Dealing phase
         var gameState = GameState.CreateDefault() with
@@ -33,6 +29,40 @@ public static class GameEngineTestHelpers
             Phase = GamePhase.Dealing
         };
 
-        return new RootState(gameState, playersState, History: [], ActionSequenceNumber: 0);
+        return new RootState(gameState, playersState, History: []);
+    }
+
+    public static RootState CreateStateReadyForStarting(int playerCount = 4, int cardsPerPlayer = 13)
+    {
+        var playerCards = CreateTestCardsForPlayer(playerCount, cardsPerPlayer);
+        var players = CreatePlayers(playerCards);
+        var playersState = new PlayersState(players);
+
+        var gameState = GameState.CreateDefault() with
+        {
+            Phase = GamePhase.Starting
+        };
+
+        return new RootState(gameState, playersState, History: []);
+    }
+
+    public static ImmutableDictionary<int, ImmutableList<Card>> CreateTestCardsForPlayer(int playerCount = 4, int cardsPerPlayer = 13)
+    {
+        var testDeck = CreateTestDeck();
+        var playerCards = Enumerable.Range(1, playerCount)
+            .ToImmutableDictionary(
+                i => i,
+                i => testDeck.Skip((i - 1) * cardsPerPlayer).Take(cardsPerPlayer).ToImmutableList());
+
+        return playerCards;
+    }
+
+    public static ImmutableDictionary<int, PlayerState> CreatePlayers(ImmutableDictionary<int, ImmutableList<Card>>? playerCards = null)
+    {
+        var playersDict = Enumerable.Range(1, 4).ToImmutableDictionary(
+            i => i,
+            i => new PlayerState(i, $"Player {i}", playerCards?.GetValueOrDefault(i) ?? []));
+
+        return playersDict;
     }
 }

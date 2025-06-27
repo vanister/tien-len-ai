@@ -13,7 +13,7 @@ public static class GameActionTypes
     public const string NewGame = "Game/NewGame";
 }
 
-public record StartGameAction(string Type, int StartingPlayerId, GamePhase Phase = GamePhase.Playing) : IAction { }
+public record StartGameAction(string Type, int StartingPlayerId) : IAction { }
 public record UpdateGamePhaseAction(string Type, GamePhase Phase) : IAction;
 public record PlayHandAction(string Type, int PlayerId, Hand Hand) : IAction;
 public record PassAction(string Type, int PlayerId) : IAction;

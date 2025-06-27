@@ -38,7 +38,7 @@ public class GameEngineSetupTests
     public void DealCards_FourPlayers_DistributesFullDeck()
     {
         // Arrange - Create store with 4 players already added and in Dealing phase
-        var initialState = GameEngineTestHelpers.CreateStateWithPlayers();
+        var initialState = GameEngineTestHelpers.CreateStateReadyForDealing();
         var store = new Store(initialState);
         var engine = new GameEngine(store);
         var testDeck = GameEngineTestHelpers.CreateTestDeck();
@@ -72,5 +72,26 @@ public class GameEngineSetupTests
         // Verify Player 1 gets cards at positions 0, 4, 8, 12, ... (round-robin pattern)
         var player1ExpectedCards = testDeck.Where((_, index) => index % 4 == 0).ToList();
         CollectionAssert.AreEquivalent(player1ExpectedCards, player1.Cards.ToList());
+    }
+
+    [TestMethod]
+    public void StartGame_FourPlayers_SetStartingPlayer()
+    {
+        // Arrange - Create store with 4 players already added and in Dealing phase
+        var initialState = GameEngineTestHelpers.CreateStateReadyForStarting();
+        var store = new Store(initialState);
+        var engine = new GameEngine(store);
+
+        // Act
+        engine.StartGame();
+
+        // Assert
+        var gameState = engine.CurrentState.Game;
+        Assert.IsNotNull(gameState.CurrentPlayerId, "CurrentPlayerId should not be null");
+        Assert.AreEqual(1, gameState.CurrentPlayerId, "Starting player should be Player 1");
+
+        var startingPlayer = PlayerSelectors.FindPlayerById(engine.CurrentState, gameState.CurrentPlayerId.Value);
+        Assert.IsNotNull(startingPlayer);
+        Assert.IsTrue(startingPlayer!.Cards.Contains(Card.ThreeOfSpades), "Starting player should have 3 of Spades");
     }
 }

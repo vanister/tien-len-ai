@@ -153,7 +153,12 @@ public class GameEngine
             throw new InvalidOperationException("The hand played cannot beat the current hand on the table");
         }
 
-        // todo - dispatch starting a new trick
+        var isNewTrick = CurrentState.Game.CurrentHand == null;
+
+        if (isNewTrick)
+        {   
+            _store.Dispatch(new StartTrickAction(GameActionTypes.StartTrick, playerId));
+        }
 
         // dispatch the action to play the hand on the game state
         var gameAction = new PlayHandAction(GameActionTypes.PlayHand, playerId, validHand);
@@ -176,10 +181,17 @@ public class GameEngine
             throw new InvalidOperationException($"Cannot pass when not in 'Playing' phase. Current phase: {CurrentState.Game.Phase}");
         }
 
-        // todo - dispatch that a trick ended
-
         var action = new PassAction(GameActionTypes.Pass, playerId);
         _store.Dispatch(action);
+
+        // check if the trick is over
+        var isTrickOver = GameSelectors.IsTrickOver(CurrentState);
+
+        if (isTrickOver)
+        {
+            // If the trick is over, we need to end the trick and start a new one
+            _store.Dispatch(new EndTrickAction(GameActionTypes.EndTrick));
+        }
     }
 
     public void UpdateGamePhase(GamePhase phase)

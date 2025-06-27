@@ -8,7 +8,7 @@ namespace TienLenAi2.Core.States.Players;
 public record PlayersState(ImmutableDictionary<int, PlayerState> ByIds)
 {
     public int TotalPlayers => ByIds.Count;
-    public IEnumerable<int> Ids => ByIds.Keys;
+    public IImmutableList<int> Ids => ByIds.Keys.ToImmutableList();
 
     public static PlayersState CreateDefault()
     {

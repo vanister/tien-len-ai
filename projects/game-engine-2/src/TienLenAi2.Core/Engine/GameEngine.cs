@@ -58,7 +58,7 @@ public class GameEngine
         }
 
         var deck = shuffledDeck ?? StandardDeck.CreateShuffled(seed);
-        var playerIds = CurrentState.Players.Ids.OrderBy(id => id).ToList();
+        var playerIds = CurrentState.Players.Ids.OrderBy(id => id).ToImmutableList();
         var totalCardsNeeded = playerIds.Count * cardsToDeal;
 
         if (deck.Count < totalCardsNeeded)

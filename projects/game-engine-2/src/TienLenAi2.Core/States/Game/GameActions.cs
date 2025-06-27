@@ -11,6 +11,8 @@ public static class GameActionTypes
     public const string NextTurn = "Game/NextTurn";
     public const string UpdateWinner = "Game/UpdateWinner";
     public const string NewGame = "Game/NewGame";
+    public const string StartTrick = "Game/StartTrick";
+    public const string EndTrick = "Game/EndTrick";
 }
 
 public record StartGameAction(string Type, int StartingPlayerId) : IAction { }
@@ -20,3 +22,5 @@ public record PassAction(string Type, int PlayerId) : IAction;
 public record NextTurnAction(string Type) : IAction;
 public record UpdateWinnerAction(string Type, int PlayerId) : IAction;
 public record NewGameAction(string Type, int? WinningPlayerId = null) : IAction;
+public record StartTrickAction(string Type, int StartingPlayerId) : IAction;
+public record EndTrickAction(string Type, int WinningPlayerId) : IAction;

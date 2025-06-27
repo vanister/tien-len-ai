@@ -41,7 +41,6 @@ public class GameEngine
         }
 
         var action = AddPlayersAction.Add(playerCount);
-
         _store.Dispatch(action);
     }
 
@@ -110,7 +109,6 @@ public class GameEngine
             ?? throw new InvalidOperationException("Cannot setup game without a player having 3 of Spades");
 
         var startAction = new StartGameAction(GameActionTypes.StartGame, startingPlayerId);
-
         _store.Dispatch(startAction);
     }
 
@@ -155,14 +153,14 @@ public class GameEngine
             throw new InvalidOperationException("The hand played cannot beat the current hand on the table");
         }
 
+        // todo - dispatch starting a new trick
+
         // dispatch the action to play the hand on the game state
         var gameAction = new PlayHandAction(GameActionTypes.PlayHand, playerId, validHand);
-
         _store.Dispatch(gameAction);
 
         // dispatch an action to remove the cards from the player's dealt hand
         var playerAction = new RemovePlayerCardsAction(PlayerActionTypes.RemovePlayerCards, playerId, validHand.Cards);
-
         _store.Dispatch(playerAction);
     }
 
@@ -178,8 +176,9 @@ public class GameEngine
             throw new InvalidOperationException($"Cannot pass when not in 'Playing' phase. Current phase: {CurrentState.Game.Phase}");
         }
 
-        var action = new PassAction(GameActionTypes.Pass, playerId);
+        // todo - dispatch that a trick ended
 
+        var action = new PassAction(GameActionTypes.Pass, playerId);
         _store.Dispatch(action);
     }
 
@@ -191,8 +190,18 @@ public class GameEngine
     public void NextTurn()
     {
         var action = new NextTurnAction(GameActionTypes.NextTurn);
-
         _store.Dispatch(action);
+    }
+
+    public void EndGame(int winningPlayerId)
+    {
+        if (CurrentState.Game.Phase != GamePhase.Playing)
+        {
+            throw new InvalidOperationException("Cannot end game when the game is not in progress");
+        }
+
+        var winnerAction = new UpdateWinnerAction(GameActionTypes.UpdateWinner, winningPlayerId);
+        _store.Dispatch(winnerAction);
     }
 
     public void NewGame(int? winningPlayerId = null)

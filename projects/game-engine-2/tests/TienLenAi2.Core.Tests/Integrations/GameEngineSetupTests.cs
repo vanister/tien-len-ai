@@ -144,4 +144,28 @@ public class GameEngineSetupTests
         Assert.IsTrue(gameState.PlayersPassed.Contains(playerId), "Player 1 should be marked as passed");
         Assert.IsFalse(GameSelectors.IsTrickOver(engine.CurrentState));
     }
+
+    [TestMethod]
+    public void UpdateGamePhase_ValidPhases()
+    {
+        var store = new Store();
+        var engine = new GameEngine(store);
+
+        Assert.AreEqual(GamePhase.NotStarted, engine.CurrentState.Game.Phase, "Initial phase should be NotStarted");
+
+        engine.UpdateGamePhase(GamePhase.AddPlayer);
+        Assert.AreEqual(GamePhase.AddPlayer, engine.CurrentState.Game.Phase, "Phase should be updated to AddPlayer");
+
+        engine.UpdateGamePhase(GamePhase.Dealing);
+        Assert.AreEqual(GamePhase.Dealing, engine.CurrentState.Game.Phase, "Phase should be updated to Dealing");
+
+        engine.UpdateGamePhase(GamePhase.Starting);
+        Assert.AreEqual(GamePhase.Starting, engine.CurrentState.Game.Phase, "Phase should be updated to Starting");
+
+        engine.UpdateGamePhase(GamePhase.Playing);
+        Assert.AreEqual(GamePhase.Playing, engine.CurrentState.Game.Phase, "Phase should be updated to Playing");
+
+        engine.UpdateGamePhase(GamePhase.GameCompleted);
+        Assert.AreEqual(GamePhase.GameCompleted, engine.CurrentState.Game.Phase, "Phase should be updated to GameCompleted");
+    }
 }

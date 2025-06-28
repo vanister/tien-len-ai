@@ -21,9 +21,7 @@ public static class PlayerStateUpdater
 
     public static PlayersState UpdatePlayerCards(PlayersState state, UpdatePlayerCardsAction action)
     {
-        var currentPlayer = state.Players.GetValueOrDefault(action.PlayerId)
-            ?? throw new InvalidOperationException($"Player with ID {action.PlayerId} not found.");
-
+        var currentPlayer = state.Players.GetValueOrDefault(action.PlayerId)!;
         var updatedPlayer = currentPlayer with { Cards = action.Cards };
         var updatedPlayers = state.Players.SetItem(action.PlayerId, updatedPlayer);
 
@@ -32,9 +30,7 @@ public static class PlayerStateUpdater
 
     public static PlayersState RemovePlayerCards(PlayersState state, RemovePlayerCardsAction action)
     {
-        var currentPlayer = state.Players.GetValueOrDefault(action.PlayerId)
-            ?? throw new InvalidOperationException($"Player with ID {action.PlayerId} not found.");
-
+        var currentPlayer = state.Players.GetValueOrDefault(action.PlayerId)!;
         var updatedPlayer = currentPlayer with { Cards = currentPlayer.Cards.RemoveRange(action.Cards) };
         var updatedPlayers = state.Players.SetItem(action.PlayerId, updatedPlayer);
 

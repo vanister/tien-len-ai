@@ -6,7 +6,7 @@ public static class PlayerSelectors
 {
     public static int? FindPlayerWith3OfSpades(RootState state)
     {
-        var players = state.Players.ByIds;
+        var players = state.Players.Players;
         var threeOfSpades = Card.ThreeOfSpades;
         var playerWithThreeOfSpades = players.
             Select(p => p.Value)
@@ -17,14 +17,14 @@ public static class PlayerSelectors
 
     public static PlayerState? FindPlayerById(RootState state, int playerId)
     {
-        var player = state.Players.ByIds.GetValueOrDefault(playerId);
+        var player = state.Players.Players.GetValueOrDefault(playerId);
 
         return player;
     }   
     
     public static bool TryFindWinner(RootState state, out PlayerState? winner)
     {
-        var players = state.Players.ByIds.Values;
+        var players = state.Players.Players.Values;
 
         // Check if any player has no cards left
         winner = players.FirstOrDefault(p => p.Cards.Count == 0);

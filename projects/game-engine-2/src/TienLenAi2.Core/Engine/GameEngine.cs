@@ -112,8 +112,11 @@ public class GameEngine
         _store.Dispatch(startAction);
     }
 
-    public void PlayHand(int playerId, IEnumerable<Card> cards, HandType handType)
+    public void PlayHand(int playerId, Hand hand)
     {
+        var cards = hand.Cards;
+        var handType = hand.Type;
+
         if (CurrentState.Game.CurrentPlayerId != playerId)
         {
             throw new InvalidOperationException($"It's not player {playerId}'s turn");
@@ -130,14 +133,14 @@ public class GameEngine
         if (!cards.All(player.Cards.Contains))
         {
             var missingCards = cards.Except(player.Cards);
-            throw new ArgumentException($"Player does not have all the cards in the provided hand. Missing {string.Join(", ", missingCards)}", nameof(cards));
+            throw new ArgumentException($"Player does not have all the cards in the provided hand. Missing {string.Join(", ", missingCards)}", nameof(hand));
         }
 
         HandFactory.TryCreateHand(cards, handType, out var validHand);
 
         if (validHand == null)
         {
-            throw new ArgumentException("Invalid hand. Cannot create hand from provided cards.", nameof(cards));
+            throw new ArgumentException($"Invalid hand. Cannot create hand from provided cards. Cards: {string.Join(",", hand.Cards)}", nameof(hand));
         }
 
         var IsFirstGame = GameSelectors.IsFirstGame(CurrentState);
@@ -156,7 +159,7 @@ public class GameEngine
         var isNewTrick = CurrentState.Game.CurrentHand == null;
 
         if (isNewTrick)
-        {   
+        {
             _store.Dispatch(new StartTrickAction(GameActionTypes.StartTrick, playerId));
         }
 

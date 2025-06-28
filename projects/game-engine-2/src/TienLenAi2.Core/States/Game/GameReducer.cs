@@ -8,6 +8,8 @@ public static class GameReducer
         {
             GameActionTypes.StartGame => GameStateUpdater.StartGame(currentState, (StartGameAction)action),
             GameActionTypes.UpdateGamePhase => GameStateUpdater.UpdateGamePhase(currentState, (UpdateGamePhaseAction)action),
+            GameActionTypes.PlayHand => GameStateUpdater.PlayHand(currentState, (PlayHandAction)action),
+            GameActionTypes.StartTrick => GameStateUpdater.StartTrick(currentState, (StartTrickAction)action),
             _ => currentState
         };
     }

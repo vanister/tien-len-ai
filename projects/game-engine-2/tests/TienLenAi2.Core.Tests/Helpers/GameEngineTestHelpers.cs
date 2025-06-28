@@ -29,7 +29,7 @@ public static class GameEngineTestHelpers
             Phase = GamePhase.Dealing
         };
 
-        return new RootState(gameState, playersState, History: []);
+        return new RootState(gameState, playersState);
     }
 
     public static RootState CreateStateReadyForStarting(int playerCount = 4, int cardsPerPlayer = 13)
@@ -43,10 +43,26 @@ public static class GameEngineTestHelpers
             Phase = GamePhase.Starting
         };
 
-        return new RootState(gameState, playersState, History: []);
+        return new RootState(gameState, playersState);
     }
 
-    public static ImmutableDictionary<int, ImmutableList<Card>> CreateTestCardsForPlayer(int playerCount = 4, int cardsPerPlayer = 13)
+    public static RootState CreateStateReadyForPlaying(int playerCount = 4, int cardsPerPlayer = 13)
+    {
+        var playerCards = CreateTestCardsForPlayer(playerCount, cardsPerPlayer);
+        var players = CreatePlayers(playerCards);
+        var playersState = new PlayersState(players);
+
+        var gameState = GameState.CreateDefault() with
+        {
+            Phase = GamePhase.Playing,
+            CurrentPlayerId = 1, // should be the player with the 3♠
+            GameNumber = 1,
+        };
+
+        return new RootState(gameState, playersState);
+    }
+
+    private static ImmutableDictionary<int, ImmutableList<Card>> CreateTestCardsForPlayer(int playerCount = 4, int cardsPerPlayer = 13)
     {
         var testDeck = CreateTestDeck();
         var playerCards = Enumerable.Range(1, playerCount)
@@ -57,7 +73,7 @@ public static class GameEngineTestHelpers
         return playerCards;
     }
 
-    public static ImmutableDictionary<int, PlayerState> CreatePlayers(ImmutableDictionary<int, ImmutableList<Card>>? playerCards = null)
+    private static ImmutableDictionary<int, PlayerState> CreatePlayers(ImmutableDictionary<int, ImmutableList<Card>>? playerCards = null)
     {
         var playersDict = Enumerable.Range(1, 4).ToImmutableDictionary(
             i => i,

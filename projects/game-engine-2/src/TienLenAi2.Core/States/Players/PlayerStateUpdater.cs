@@ -7,9 +7,7 @@ public static class PlayerStateUpdater
 {
     public static PlayersState AddPlayers(PlayersState state, AddPlayersAction action)
     {
-        ArgumentNullException.ThrowIfNull(action);
-
-        var playersDict = state.ByIds;
+        var playersDict = state.Players;
 
         foreach (var playerInfo in action.Players)
         {
@@ -18,22 +16,28 @@ public static class PlayerStateUpdater
             playersDict = playersDict.Add(playerInfo.Id, player);
         }
 
-        return state with { ByIds = playersDict };
+        return state with { Players = playersDict };
     }
 
     public static PlayersState UpdatePlayerCards(PlayersState state, UpdatePlayerCardsAction action)
     {
-        ArgumentNullException.ThrowIfNull(action);
+        var currentPlayer = state.Players.GetValueOrDefault(action.PlayerId)
+            ?? throw new InvalidOperationException($"Player with ID {action.PlayerId} not found.");
 
-        if (!state.ByIds.ContainsKey(action.PlayerId))
-        {
-            throw new ArgumentException($"Player with ID {action.PlayerId} does not exist", nameof(action));
-        }
-
-        var currentPlayer = state.ByIds[action.PlayerId];
         var updatedPlayer = currentPlayer with { Cards = action.Cards };
-        var updatedPlayers = state.ByIds.SetItem(action.PlayerId, updatedPlayer);
+        var updatedPlayers = state.Players.SetItem(action.PlayerId, updatedPlayer);
 
-        return state with { ByIds = updatedPlayers };
+        return state with { Players = updatedPlayers };
+    }
+
+    public static PlayersState RemovePlayerCards(PlayersState state, RemovePlayerCardsAction action)
+    {
+        var currentPlayer = state.Players.GetValueOrDefault(action.PlayerId)
+            ?? throw new InvalidOperationException($"Player with ID {action.PlayerId} not found.");
+
+        var updatedPlayer = currentPlayer with { Cards = currentPlayer.Cards.RemoveRange(action.Cards) };
+        var updatedPlayers = state.Players.SetItem(action.PlayerId, updatedPlayer);
+
+        return state with { Players = updatedPlayers };
     }
 }

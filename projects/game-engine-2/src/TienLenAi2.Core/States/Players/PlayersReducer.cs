@@ -10,6 +10,7 @@ public static class PlayersReducer
         {
             PlayerActionTypes.AddPlayers => PlayerStateUpdater.AddPlayers(state, (AddPlayersAction)action),
             PlayerActionTypes.UpdatePlayerCards => PlayerStateUpdater.UpdatePlayerCards(state, (UpdatePlayerCardsAction)action),
+            PlayerActionTypes.RemovePlayerCards => PlayerStateUpdater.RemovePlayerCards(state, (RemovePlayerCardsAction)action),
             _ => state
         };
     }

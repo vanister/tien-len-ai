@@ -14,7 +14,7 @@ public record GameState(
     int? WinningPlayerId = null
 )
 {
-    public IImmutableList<Hand> History { get; init; } = [];
+    public ImmutableList<Hand> PlayedHands { get; init; } = [];
 
     public static GameState CreateDefault() => new();
 };

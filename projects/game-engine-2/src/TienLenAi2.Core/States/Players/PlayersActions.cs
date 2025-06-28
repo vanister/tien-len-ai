@@ -26,6 +26,13 @@ public record AddPlayersAction(string Type, ImmutableList<PlayerInfo> Players) :
 }
 
 public record UpdatePlayerCardsAction(string Type, int PlayerId, ImmutableList<Card> Cards) : IAction;
+
+/// <summary>
+/// Action to remove cards from a player's hand.
+/// </summary>
+/// <param name="Type">The action type.</param>
+/// <param name="PlayerId">The player Id.</param>
+/// <param name="Cards">The cards to remove.</param>
 public record RemovePlayerCardsAction(string Type, int PlayerId, ImmutableList<Card> Cards) : IAction;  
 
 #endregion

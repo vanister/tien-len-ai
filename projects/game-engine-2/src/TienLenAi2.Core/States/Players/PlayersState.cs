@@ -5,10 +5,10 @@ namespace TienLenAi2.Core.States.Players;
 /// <summary>
 /// Represents the state of all players in the game.
 /// </summary>
-public record PlayersState(ImmutableDictionary<int, PlayerState> ByIds)
+public record PlayersState(ImmutableDictionary<int, PlayerState> Players)
 {
-    public int TotalPlayers => ByIds.Count;
-    public IImmutableList<int> Ids => ByIds.Keys.ToImmutableList();
+    public int TotalPlayers => Players.Count;
+    public ImmutableList<int> Ids => [.. Players.Keys];
 
     public static PlayersState CreateDefault()
     {

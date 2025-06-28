@@ -3,6 +3,8 @@ using TienLenAi2.Core.Cards;
 using TienLenAi2.Core.Engine;
 using TienLenAi2.Core.States;
 using TienLenAi2.Core.States.Players;
+using TienLenAi2.Core.Hands;
+using TienLenAi2.Core.States.Game;
 
 namespace TienLenAi2.Core.Tests.Integrations;
 
@@ -27,7 +29,7 @@ public class GameEngineSetupTests
         CollectionAssert.AreEqual(expectedPlayerIds, playersState.Ids.OrderBy(id => id).ToArray());
 
         // Verify player names
-        foreach (var (_, player) in playersState.ByIds)
+        foreach (var (_, player) in playersState.Players)
         {
             Assert.IsNotNull(player);
             Assert.AreEqual($"Player {player.Id}", player.Name);
@@ -50,14 +52,14 @@ public class GameEngineSetupTests
 
         // Assert
         // Verify each player has exactly 13 cards
-        foreach (var (_, player) in playersState.ByIds)
+        foreach (var (_, player) in playersState.Players)
         {
             Assert.IsNotNull(player);
             Assert.AreEqual(13, player.Cards.Count, $"Player {player.Id} should have 13 cards");
         }
 
         // Verify all 52 cards are distributed (no duplicates)
-        var allPlayerCards = playersState.ByIds.Values
+        var allPlayerCards = playersState.Players.Values
             .Where(p => p != null)
             .SelectMany(p => p!.Cards)
             .ToList();
@@ -93,5 +95,34 @@ public class GameEngineSetupTests
         var startingPlayer = PlayerSelectors.FindPlayerById(engine.CurrentState, gameState.CurrentPlayerId.Value);
         Assert.IsNotNull(startingPlayer);
         Assert.IsTrue(startingPlayer!.Cards.Contains(Card.ThreeOfSpades), "Starting player should have 3 of Spades");
+    }
+
+    [TestMethod]
+    public void PlayHand_FourPlayers_ValidHand_FirstPlay()
+    {
+        // Arrange - Create store with 4 players and a valid game state
+        var initialState = GameEngineTestHelpers.CreateStateReadyForPlaying();
+        var store = new Store(initialState);
+        var engine = new GameEngine(store);
+
+        // Act - Player 1 plays a valid hand
+        var playerId = 1;
+        var hand = new Hand(HandType.Single, [Card.ThreeOfSpades]);
+
+        engine.PlayHand(playerId, hand);
+
+        // Assert - Check that the hand was played successfully
+        var gameState = engine.CurrentState.Game;
+        Assert.AreEqual(GamePhase.Playing, gameState.Phase, "Game should still be in Playing phase");
+        Assert.AreEqual(playerId, gameState.CurrentPlayerId, "Last player should be Player 1");
+        Assert.IsTrue(!gameState.PlayedHands.IsEmpty, "There should be at least one played hand");
+        Assert.AreEqual(1, gameState.TrickNumber, "Trick number should be 1 for first play");
+        Assert.AreEqual(1, gameState.GameNumber, "Game number should be 1 for the first game");
+        Assert.AreEqual(playerId, gameState.StartingTrickPlayerId, $"Starting trick player should be player {playerId}");
+
+        // Verify that the player's cards were updated correctly
+        var player1 = PlayerSelectors.FindPlayerById(engine.CurrentState, playerId);
+        Assert.IsNotNull(player1);
+        CollectionAssert.DoesNotContain(player1!.Cards, Card.ThreeOfSpades, "Player 1 should no longer have 3♠");
     }
 }

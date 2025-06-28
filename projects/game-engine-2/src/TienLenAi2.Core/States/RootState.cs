@@ -14,17 +14,16 @@ namespace TienLenAi2.Core.States;
 public record RootState(
     GameState Game,
     PlayersState Players,
-    IImmutableList<HistoryState> History,
     long ActionSequenceNumber = 0
-    // add stats like total rounds, who which round, etc. if needed
 )
 {
+    public ImmutableList<HistoryState> History { get; init; } = [];
+
     public static RootState CreateDefault()
     {
         var game = GameState.CreateDefault();
         var players = PlayersState.CreateDefault();
-        var history = ImmutableList<HistoryState>.Empty;
 
-        return new RootState(game, players, history, ActionSequenceNumber: 0);
+        return new RootState(game, players);
     }
 }

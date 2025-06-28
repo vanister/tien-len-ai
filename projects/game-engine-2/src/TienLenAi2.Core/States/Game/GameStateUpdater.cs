@@ -9,6 +9,7 @@ public static class GameStateUpdater
         return state with
         {
             CurrentPlayerId = action.StartingPlayerId,
+            GameNumber = state.GameNumber + 1,
         };
     }
 
@@ -17,6 +18,32 @@ public static class GameStateUpdater
         return state with
         {
             Phase = action.Phase
+        };
+    }
+
+    public static GameState PlayHand(GameState state, PlayHandAction action)
+    {
+        var hand = action.Hand;
+
+        return state with
+        {
+            PlayedHands = state.PlayedHands.Add(hand),
+            CurrentHandType = hand.Type,
+            CurrentHand = hand,
+        };
+    }
+
+    public static GameState StartTrick(GameState state, StartTrickAction action)
+    {
+        var startingPlayerId = action.StartingPlayerId;
+
+        return state with
+        {
+            StartingTrickPlayerId = startingPlayerId,
+            CurrentPlayerId = startingPlayerId,
+            TrickNumber = state.TrickNumber + 1,
+            CurrentHand = null,
+            CurrentHandType = null
         };
     }
 }

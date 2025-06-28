@@ -96,6 +96,21 @@ public static class GameEngineTestHelpers
         return new RootState(gameState, playersState);
     }
 
+    public static RootState CreateStateForNextTurn(int playerCount = 4, int cardsPerPlayer = 13, int currentPlayerId = 1)
+    {
+        // for now it's the same as play hand
+        var initialState = CreateStateForPlayHand(playerCount, cardsPerPlayer);
+        var gameState = initialState.Game with
+        {
+            CurrentPlayerId = currentPlayerId,
+        };
+
+        return initialState with
+        {
+            Game = gameState
+        };
+    }
+
     private static ImmutableDictionary<int, ImmutableList<Card>> CreateCardsForPlayer(int playerCount = 4, int cardsPerPlayer = 13)
     {
         var testDeck = CreateTestDeck();

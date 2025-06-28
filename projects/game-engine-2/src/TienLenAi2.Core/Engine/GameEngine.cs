@@ -186,7 +186,7 @@ public class GameEngine
 
         var totalPlayers = CurrentState.Players.TotalPlayers;
         var action = new PassAction(GameActionTypes.Pass, playerId, totalPlayers);
-        
+
         _store.Dispatch(action);
     }
 
@@ -197,7 +197,14 @@ public class GameEngine
 
     public void NextTurn()
     {
-        var action = new NextTurnAction(GameActionTypes.NextTurn);
+        if (CurrentState.Game.Phase != GamePhase.Playing)
+        {
+            throw new InvalidOperationException("Cannot proceed to next turn when the game is not in progress");
+        }
+
+        var totalPlayers = CurrentState.Players.TotalPlayers;
+        var action = new NextTurnAction(GameActionTypes.NextTurn, totalPlayers);
+
         _store.Dispatch(action);
     }
 

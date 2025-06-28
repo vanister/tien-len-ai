@@ -19,7 +19,7 @@ public record StartGameAction(string Type, int StartingPlayerId) : IAction { }
 public record UpdateGamePhaseAction(string Type, GamePhase Phase) : IAction;
 public record PlayHandAction(string Type, int PlayerId, Hand Hand) : IAction;
 public record PassAction(string Type, int PlayerId, int TotalPlayers) : IAction;
-public record NextTurnAction(string Type) : IAction;
+public record NextTurnAction(string Type, int TotalPlayers) : IAction;
 public record UpdateWinnerAction(string Type, int PlayerId) : IAction;
 public record NewGameAction(string Type, int? WinningPlayerId = null) : IAction;
 public record StartTrickAction(string Type, int StartingPlayerId) : IAction;

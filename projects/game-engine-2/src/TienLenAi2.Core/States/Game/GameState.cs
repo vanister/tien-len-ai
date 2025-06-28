@@ -8,6 +8,7 @@ public record GameState(
     int GameNumber = 0,
     int TrickNumber = 0,
     bool IsTrickOver = false,
+    // todo - add total palyers
     HandType? CurrentHandType = null,
     Hand? CurrentHand = null,
     int? StartingTrickPlayerId = null,

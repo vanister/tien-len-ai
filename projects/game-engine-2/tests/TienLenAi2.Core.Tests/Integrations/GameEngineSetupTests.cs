@@ -168,4 +168,21 @@ public class GameEngineSetupTests
         engine.UpdateGamePhase(GamePhase.GameCompleted);
         Assert.AreEqual(GamePhase.GameCompleted, engine.CurrentState.Game.Phase, "Phase should be updated to GameCompleted");
     }
+
+    [TestMethod]
+    public void NextTurn_FourPlayers_ValidTurn()
+    {
+        // Arrange - Create store with 4 players and a valid game state
+        var initialState = GameEngineTestHelpers.CreateStateForNextTurn(currentPlayerId: 1);
+        var store = new Store(initialState);
+        var engine = new GameEngine(store);
+
+        // Act - Move to the next turn
+        engine.NextTurn();
+
+        // Assert - Check that the current player has been updated correctly
+        var gameState = engine.CurrentState.Game;
+        Assert.AreEqual(2, gameState.CurrentPlayerId, "Next player should be Player 2");
+        Assert.AreEqual(1, gameState.TrickNumber, "Trick number should remain 1 after next turn");
+    }
 }

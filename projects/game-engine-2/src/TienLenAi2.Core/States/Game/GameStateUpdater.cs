@@ -46,4 +46,19 @@ public static class GameStateUpdater
             CurrentHandType = null
         };
     }
+
+    public static GameState Pass(GameState state, PassAction action)
+    {
+        var playerId = action.PlayerId;
+        // Add the player to the set of players who have passed
+        var updatedPlayersPassed = state.PlayersPassed.Add(playerId);
+        // the trick is over if all but one player has passed   
+        var isTrickOver = updatedPlayersPassed.Count == action.TotalPlayers - 1;
+
+        return state with
+        {
+            PlayersPassed = updatedPlayersPassed,
+            IsTrickOver = isTrickOver
+        };
+    }
 }

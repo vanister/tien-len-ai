@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using TienLenAi2.Core.Cards;
+using TienLenAi2.Core.Hands;
 using TienLenAi2.Core.States;
 using TienLenAi2.Core.States.Game;
 using TienLenAi2.Core.States.Players;
@@ -17,7 +18,7 @@ public static class GameEngineTestHelpers
         return [.. deck];
     }
 
-    public static RootState CreateStateReadyForDealing()
+    public static RootState CreateStateForDealCards()
     {
         // Create players state with 4 players
         var players = CreatePlayers();
@@ -32,9 +33,9 @@ public static class GameEngineTestHelpers
         return new RootState(gameState, playersState);
     }
 
-    public static RootState CreateStateReadyForStarting(int playerCount = 4, int cardsPerPlayer = 13)
+    public static RootState CreateStateForStartGame(int playerCount = 4, int cardsPerPlayer = 13)
     {
-        var playerCards = CreateTestCardsForPlayer(playerCount, cardsPerPlayer);
+        var playerCards = CreateCardsForPlayer(playerCount, cardsPerPlayer);
         var players = CreatePlayers(playerCards);
         var playersState = new PlayersState(players);
 
@@ -46,9 +47,9 @@ public static class GameEngineTestHelpers
         return new RootState(gameState, playersState);
     }
 
-    public static RootState CreateStateReadyForPlaying(int playerCount = 4, int cardsPerPlayer = 13)
+    public static RootState CreateStateForPlayHand(int playerCount = 4, int cardsPerPlayer = 13)
     {
-        var playerCards = CreateTestCardsForPlayer(playerCount, cardsPerPlayer);
+        var playerCards = CreateCardsForPlayer(playerCount, cardsPerPlayer);
         var players = CreatePlayers(playerCards);
         var playersState = new PlayersState(players);
 
@@ -62,7 +63,40 @@ public static class GameEngineTestHelpers
         return new RootState(gameState, playersState);
     }
 
-    private static ImmutableDictionary<int, ImmutableList<Card>> CreateTestCardsForPlayer(int playerCount = 4, int cardsPerPlayer = 13)
+    public static RootState CreateStateForPassTurn(
+        int playerCount = 4,
+        int cardsPerPlayer = 13,
+        int currentPlayerId = 1,
+        ImmutableHashSet<int>? passedPlayers = null)
+    {
+        var playerCards = CreateCardsForPlayer(playerCount, cardsPerPlayer);
+        var players = CreatePlayers(playerCards);
+        var player1 = players.GetValueOrDefault(currentPlayerId)!;
+        var hand = new Hand(HandType.Single, [Card.ThreeOfSpades]);
+
+        // the game state for the very first game and hand
+        var gameState = GameState.CreateDefault() with
+        {
+            Phase = GamePhase.Playing,
+            CurrentPlayerId = player1.Id, // should be the player with the 3♠
+            GameNumber = 1,
+            TrickNumber = 1,
+            StartingTrickPlayerId = player1.Id,
+            CurrentHand = hand,
+            PlayedHands = [hand],
+            PlayersPassed = passedPlayers ?? []
+        };
+
+        // Player 1 has the 3♠ and plays it, so we need to remove it from their cards
+        player1 = player1 with { Cards = player1.Cards.Remove(Card.ThreeOfSpades) };
+
+        var updatedPlayers = players.SetItem(player1.Id, player1);
+        var playersState = new PlayersState(updatedPlayers);
+
+        return new RootState(gameState, playersState);
+    }
+
+    private static ImmutableDictionary<int, ImmutableList<Card>> CreateCardsForPlayer(int playerCount = 4, int cardsPerPlayer = 13)
     {
         var testDeck = CreateTestDeck();
         var playerCards = Enumerable.Range(1, playerCount)

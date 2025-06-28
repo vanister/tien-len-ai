@@ -10,6 +10,7 @@ public static class GameReducer
             GameActionTypes.UpdateGamePhase => GameStateUpdater.UpdateGamePhase(currentState, (UpdateGamePhaseAction)action),
             GameActionTypes.PlayHand => GameStateUpdater.PlayHand(currentState, (PlayHandAction)action),
             GameActionTypes.StartTrick => GameStateUpdater.StartTrick(currentState, (StartTrickAction)action),
+            GameActionTypes.Pass => GameStateUpdater.Pass(currentState, (PassAction)action),
             _ => currentState
         };
     }

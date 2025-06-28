@@ -40,7 +40,7 @@ public class GameEngineSetupTests
     public void DealCards_FourPlayers_DistributesFullDeck()
     {
         // Arrange - Create store with 4 players already added and in Dealing phase
-        var initialState = GameEngineTestHelpers.CreateStateReadyForDealing();
+        var initialState = GameEngineTestHelpers.CreateStateForDealCards();
         var store = new Store(initialState);
         var engine = new GameEngine(store);
         var testDeck = GameEngineTestHelpers.CreateTestDeck();
@@ -80,7 +80,7 @@ public class GameEngineSetupTests
     public void StartGame_FourPlayers_SetStartingPlayer()
     {
         // Arrange - Create store with 4 players already added and in Dealing phase
-        var initialState = GameEngineTestHelpers.CreateStateReadyForStarting();
+        var initialState = GameEngineTestHelpers.CreateStateForStartGame();
         var store = new Store(initialState);
         var engine = new GameEngine(store);
 
@@ -101,7 +101,7 @@ public class GameEngineSetupTests
     public void PlayHand_FourPlayers_ValidHand_FirstPlay()
     {
         // Arrange - Create store with 4 players and a valid game state
-        var initialState = GameEngineTestHelpers.CreateStateReadyForPlaying();
+        var initialState = GameEngineTestHelpers.CreateStateForPlayHand();
         var store = new Store(initialState);
         var engine = new GameEngine(store);
 
@@ -124,5 +124,24 @@ public class GameEngineSetupTests
         var player1 = PlayerSelectors.FindPlayerById(engine.CurrentState, playerId);
         Assert.IsNotNull(player1);
         CollectionAssert.DoesNotContain(player1!.Cards, Card.ThreeOfSpades, "Player 1 should no longer have 3♠");
+    }
+
+    [TestMethod]
+    public void Pass_FourPlayers_MidTrick()
+    {
+        // Arrange - Create store with 4 players and a valid game state
+        var initialState = GameEngineTestHelpers.CreateStateForPassTurn();
+        var store = new Store(initialState);
+        var engine = new GameEngine(store);
+
+        // Act - Player 1 passes their turn
+        var playerId = 1;
+        engine.Pass(playerId);
+
+        // Assert - Check that the turn was passed successfully
+        var gameState = engine.CurrentState.Game;
+        Assert.AreEqual(GamePhase.Playing, gameState.Phase, "Game should still be in Playing phase");
+        Assert.IsTrue(gameState.PlayersPassed.Contains(playerId), "Player 1 should be marked as passed");
+        Assert.IsFalse(GameSelectors.IsTrickOver(engine.CurrentState));
     }
 }

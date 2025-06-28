@@ -184,17 +184,10 @@ public class GameEngine
             throw new InvalidOperationException($"Cannot pass when not in 'Playing' phase. Current phase: {CurrentState.Game.Phase}");
         }
 
-        var action = new PassAction(GameActionTypes.Pass, playerId);
+        var totalPlayers = CurrentState.Players.TotalPlayers;
+        var action = new PassAction(GameActionTypes.Pass, playerId, totalPlayers);
+        
         _store.Dispatch(action);
-
-        // check if the trick is over
-        var isTrickOver = GameSelectors.IsTrickOver(CurrentState);
-
-        if (isTrickOver)
-        {
-            // If the trick is over, we need to end the trick and start a new one
-            _store.Dispatch(new EndTrickAction(GameActionTypes.EndTrick));
-        }
     }
 
     public void UpdateGamePhase(GamePhase phase)

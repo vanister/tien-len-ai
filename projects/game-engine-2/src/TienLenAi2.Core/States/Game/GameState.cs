@@ -7,6 +7,7 @@ public record GameState(
     GamePhase Phase = GamePhase.NotStarted,
     int GameNumber = 0,
     int TrickNumber = 0,
+    bool IsTrickOver = false,
     HandType? CurrentHandType = null,
     Hand? CurrentHand = null,
     int? StartingTrickPlayerId = null,
@@ -15,6 +16,7 @@ public record GameState(
 )
 {
     public ImmutableList<Hand> PlayedHands { get; init; } = [];
+    public ImmutableHashSet<int> PlayersPassed { get; init; } = [];
 
     public static GameState CreateDefault() => new();
 };

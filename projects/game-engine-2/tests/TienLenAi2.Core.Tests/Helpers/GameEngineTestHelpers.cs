@@ -73,6 +73,7 @@ public static class GameEngineTestHelpers
         var players = CreatePlayers(playerCards);
         var player1 = players.GetValueOrDefault(currentPlayerId)!;
         var hand = new Hand(HandType.Single, [Card.ThreeOfSpades]);
+        var currentTrick = new CurrentTrick(player1.Id, hand);
 
         // the game state for the very first game and hand
         var gameState = GameState.CreateDefault() with
@@ -80,10 +81,8 @@ public static class GameEngineTestHelpers
             Phase = GamePhase.Playing,
             CurrentPlayerId = player1.Id, // should be the player with the 3♠
             GameNumber = 1,
-            TrickNumber = 1,
-            StartingTrickPlayerId = player1.Id,
-            CurrentHand = hand,
             PlayedHands = [hand],
+            CurrentTrick = currentTrick,
             PlayersPassed = passedPlayers ?? []
         };
 

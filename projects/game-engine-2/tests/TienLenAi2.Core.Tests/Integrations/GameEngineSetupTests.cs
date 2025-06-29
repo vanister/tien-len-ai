@@ -115,10 +115,9 @@ public class GameEngineSetupTests
         var gameState = engine.CurrentState.Game;
         Assert.AreEqual(GamePhase.Playing, gameState.Phase, "Game should still be in Playing phase");
         Assert.AreEqual(playerId, gameState.CurrentPlayerId, "Last player should be Player 1");
-        Assert.IsTrue(!gameState.PlayedHands.IsEmpty, "There should be at least one played hand");
-        Assert.AreEqual(1, gameState.TrickNumber, "Trick number should be 1 for first play");
+        Assert.IsFalse(gameState.PlayedHands.IsEmpty, "There should be at least one played hand");
         Assert.AreEqual(1, gameState.GameNumber, "Game number should be 1 for the first game");
-        Assert.AreEqual(playerId, gameState.StartingTrickPlayerId, $"Starting trick player should be player {playerId}");
+        Assert.AreEqual(playerId, gameState.CurrentTrick?.PlayerId, "Current trick should be started by Player 1");
 
         // Verify that the player's cards were updated correctly
         var player1 = PlayerSelectors.FindPlayerById(engine.CurrentState, playerId);
@@ -183,6 +182,5 @@ public class GameEngineSetupTests
         // Assert - Check that the current player has been updated correctly
         var gameState = engine.CurrentState.Game;
         Assert.AreEqual(2, gameState.CurrentPlayerId, "Next player should be Player 2");
-        Assert.AreEqual(1, gameState.TrickNumber, "Trick number should remain 1 after next turn");
     }
 }

@@ -6,12 +6,9 @@ namespace TienLenAi2.Core.States.Game;
 public record GameState(
     GamePhase Phase = GamePhase.NotStarted,
     int GameNumber = 0,
-    int TrickNumber = 0,
     bool IsTrickOver = false,
-    // todo - add total palyers
-    HandType? CurrentHandType = null,
-    Hand? CurrentHand = null,
-    int? StartingTrickPlayerId = null,
+    int TotalPlayers = 0,
+    CurrentTrick? CurrentTrick = null,
     int? CurrentPlayerId = null,
     int? WinningPlayerId = null
 )
@@ -21,3 +18,10 @@ public record GameState(
 
     public static GameState CreateDefault() => new();
 };
+
+/// <summary>
+/// Represents the current trick in the game.
+/// </summary>
+/// <param name="PlayerId">The player with the hand to beat.</param>
+/// <param name="Hand">The hand to beat.</param>
+public record CurrentTrick(int PlayerId, Hand Hand) { }

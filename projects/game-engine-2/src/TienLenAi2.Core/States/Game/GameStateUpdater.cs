@@ -24,26 +24,13 @@ public static class GameStateUpdater
     public static GameState PlayHand(GameState state, PlayHandAction action)
     {
         var hand = action.Hand;
+        // when a hand is played, that means its the start of a new trick
+        var currentTrick = new CurrentTrick(action.PlayerId, hand);
 
         return state with
         {
             PlayedHands = state.PlayedHands.Add(hand),
-            CurrentHandType = hand.Type,
-            CurrentHand = hand,
-        };
-    }
-
-    public static GameState StartTrick(GameState state, StartTrickAction action)
-    {
-        var startingPlayerId = action.StartingPlayerId;
-
-        return state with
-        {
-            StartingTrickPlayerId = startingPlayerId,
-            CurrentPlayerId = startingPlayerId,
-            TrickNumber = state.TrickNumber + 1,
-            CurrentHand = null,
-            CurrentHandType = null
+            CurrentTrick = currentTrick
         };
     }
 

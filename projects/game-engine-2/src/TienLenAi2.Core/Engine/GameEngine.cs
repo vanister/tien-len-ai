@@ -151,16 +151,9 @@ public class GameEngine
         }
 
         // make sure hand can beat the current hand on the table
-        if (CurrentState.Game.CurrentHand != null && !validHand.CanBeat(CurrentState.Game.CurrentHand))
+        if (CurrentState.Game.CurrentTrick != null && !validHand.CanBeat(CurrentState.Game.CurrentTrick.Hand))
         {
             throw new InvalidOperationException("The hand played cannot beat the current hand on the table");
-        }
-
-        var isNewTrick = CurrentState.Game.CurrentHand == null;
-
-        if (isNewTrick)
-        {
-            _store.Dispatch(new StartTrickAction(GameActionTypes.StartTrick, playerId));
         }
 
         // dispatch the action to play the hand on the game state
